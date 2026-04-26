@@ -29,8 +29,6 @@ your project.
     worktree-isolation.md      — invariants for isolation:worktree dispatches
 .github/workflows/
   orchestrator.yml             — daily orchestrator dispatch via claude-code-action
-  image.yml                    — build & publish CI + devcontainer images
-  deps-update.yml              — weekly dependency-snapshot freshness check
   health-deep-weekly.yml       — weekly deep health-scanner dispatch
 dev/
   agent-feature-workflow.md    — shared workflow doc every feat-agent reads at session start
