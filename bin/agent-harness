@@ -1,0 +1,104 @@
+#!/bin/sh
+# agent-harness — scaffolding CLI for the Claude Code orchestration harness.
+#
+# Usage:
+#   agent-harness init <target-dir>          Bootstrap a new project from this template.
+#   agent-harness sync --reusable-only       Update `harness: reusable` files from upstream.
+#   agent-harness check                      Verify the layer model (delegates to agent-harness-check.sh).
+#   agent-harness help                       This message.
+#
+# Exit code: 0 on success, 1 on any error.
+#
+# Status: stub. `init` and `sync` are placeholders; only `check` and
+# `help` are functional. Implementation is being driven by real
+# bootstrap of the second consuming project — see the agent-harness
+# repo's open issues / follow-ups for current state.
+
+set -eu
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+HARNESS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+usage() {
+  cat <<'EOF'
+agent-harness — scaffolding CLI for the Claude Code orchestration harness.
+
+Usage:
+  agent-harness init <target-dir>      Bootstrap a new project from this template.
+  agent-harness sync --reusable-only   Update `harness: reusable` files from upstream.
+  agent-harness check                  Verify the layer model.
+  agent-harness help                   This message.
+
+Subcommand status:
+  check    — implemented (delegates to bin/agent-harness-check.sh).
+  init     — STUB. Manually copy the template files for now.
+  sync     — STUB. Manually cherry-pick from upstream for now.
+EOF
+}
+
+cmd_check() {
+  exec sh "$SCRIPT_DIR/agent-harness-check.sh"
+}
+
+cmd_init() {
+  target=${1:-}
+  if [ -z "$target" ]; then
+    echo "agent-harness init: missing target directory argument" >&2
+    echo "usage: agent-harness init <target-dir>" >&2
+    exit 1
+  fi
+  cat <<EOF >&2
+agent-harness init: not yet implemented.
+
+Manual bootstrap recipe:
+  1. mkdir -p $target/.claude/agents $target/.claude/rules $target/dev/lib $target/.github/workflows
+  2. Copy from this template:
+     cp $HARNESS_ROOT/.claude/agents/*.md $target/.claude/agents/
+     cp $HARNESS_ROOT/.claude/rules/*.md $target/.claude/rules/
+     cp $HARNESS_ROOT/.github/workflows/*.yml $target/.github/workflows/
+     cp $HARNESS_ROOT/dev/lib/*.sh $target/dev/lib/
+     cp $HARNESS_ROOT/dev/agent-feature-workflow.md $target/dev/
+     cp $HARNESS_ROOT/.claude/settings.json $target/.claude/
+  3. Adjust the Configuration block at the top of:
+       $target/.claude/agents/lead-orchestrator.md
+       $target/.github/workflows/orchestrator.yml
+     Replace each project-specific literal listed in the block.
+  4. Write the project authority files:
+       $target/.claude/rules/qc-structural-authority.md
+       $target/.claude/rules/qc-behavioral-authority.md
+     (See the source-project examples for the shape.)
+  5. Write any feat-* agents your project needs as
+     $target/.claude/agents/feat-<name>.md (mark harness: project).
+  6. Edit $target/dev/agent-feature-workflow.md for your toolchain
+     (the shipped version assumes OCaml + Dune + jj + Docker).
+  7. Run agent-harness check to verify the layer model.
+EOF
+  exit 1
+}
+
+cmd_sync() {
+  cat <<'EOF' >&2
+agent-harness sync: not yet implemented.
+
+Manual sync recipe (until automated):
+  1. cd into the upstream agent-harness clone.
+  2. git log --since=<last-sync-date> --diff-filter=AM --pretty=format:"%h %s" \
+       -- .claude/agents/ .claude/rules/ dev/lib/ .github/workflows/
+  3. For each commit affecting `harness: reusable` files, cherry-pick
+     manually into your project: git format-patch <sha> -1 -o /tmp/
+     then in your project: git am -3 /tmp/<patch>.
+  4. Resolve any conflicts. The upstream version wins for
+     `harness: reusable` content; your project's version wins for
+     `harness: project` content.
+  5. Run agent-harness check to confirm tags are intact.
+EOF
+  exit 1
+}
+
+case "${1:-help}" in
+  init)  shift; cmd_init "$@" ;;
+  sync)  shift; cmd_sync "$@" ;;
+  check) shift; cmd_check ;;
+  help|-h|--help) usage ;;
+  *)     echo "agent-harness: unknown subcommand: $1" >&2; usage; exit 1 ;;
+esac
