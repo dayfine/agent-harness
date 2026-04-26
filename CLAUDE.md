@@ -1,0 +1,43 @@
+# CLAUDE.md
+
+This file is read by Claude Code when this repo (or a consuming
+project) is opened in an agentic session. It points at the harness
+README and reminds the agent of the three-layer model.
+
+## What this repo is
+
+A template / scaffolding for Claude Code orchestration harnesses. It
+ships generic agents (lead-orchestrator, harness-maintainer,
+health-scanner, code-health, qc-structural, qc-behavioral) plus
+GitHub Actions workflows and `dev/` directory contracts (status,
+plans, lib helpers).
+
+See `README.md` for the full inventory and how to consume.
+
+## Three-layer model
+
+Every file under `.claude/agents/` and `.claude/rules/` carries a
+YAML frontmatter `harness:` field with one of three values:
+
+- `reusable` — ship as-is. Generic across any project.
+- `template` — skeleton with `<TODO>` placeholders that each
+  consuming project copies and fills in.
+- `project` — project-specific (domain rules, tool lists, lint
+  names). Lives only in the consuming project, never in this template.
+
+When extending the harness here, only add `reusable` or `template`
+files. Anything `project` belongs in the consuming repo.
+
+## Consuming projects
+
+A consuming project gets its own `CLAUDE.md` that points at its
+codebase and project-specific rules (e.g. language patterns, domain
+references). The harness layer is loaded on top and provides the
+orchestration. The two CLAUDE.md files do not conflict — one is about
+the project, one is about the agentic harness.
+
+## Source
+
+Extracted from `dayfine/trading` on 2026-04-26 per
+`dev/plans/harness-template-extraction-2026-04-26.md` §Phase 2 in
+the source repo.
