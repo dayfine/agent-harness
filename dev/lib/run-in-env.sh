@@ -17,7 +17,7 @@
 # 3. Replace TRADING_CONTAINER_NAME default with your container name.
 # 4. Replace TRADING_IN_CONTAINER env-var name with your project's
 #    equivalent, or rename to something generic like AGENT_HARNESS_IN_ENV.
-# 5. Replace /workspaces/trading-1 docker-root path with your container's
+# 5. Replace /workspaces/<PROJECT_NAME> docker-root path with your container's
 #    mount point.
 #
 # The split between in-container (GHA / devcontainer) and local-docker
@@ -28,7 +28,7 @@
 #   dev/lib/run-in-env.sh dune build
 #   dev/lib/run-in-env.sh dune runtest trading/backtest/test/
 #
-# Locally (default): wraps with `docker exec` into trading-1-dev,
+# Locally (default): wraps with `docker exec` into <PROJECT_NAME>-dev,
 # cd's to the workspace, and sources opam env.
 #
 # In GHA / devcontainer: set TRADING_IN_CONTAINER=1 and the script
@@ -47,7 +47,7 @@
 
 set -euo pipefail
 
-CONTAINER_NAME="${TRADING_CONTAINER_NAME:-trading-1-dev}"
+CONTAINER_NAME="${TRADING_CONTAINER_NAME:-<PROJECT_NAME>-dev}"
 
 if [ $# -eq 0 ]; then
   echo "Usage: dev/lib/run-in-env.sh <command> [args...]" >&2
@@ -83,15 +83,19 @@ if [ -n "${TRADING_IN_CONTAINER:-}" ]; then
 else
   # --- Local path: delegate to docker exec ---
 
-  # The container mounts the repo at /workspaces/trading-1/.
-  # The dune workspace root is at /workspaces/trading-1/trading/ (has dune-workspace).
-  DOCKER_TRADING_ROOT="/workspaces/trading-1/trading"
+  # The container mounts the repo at /workspaces/<PROJECT_NAME>/.
+  # The dune workspace root is at /workspaces/<PROJECT_NAME>/trading/ (has dune-workspace).
+  DOCKER_TRADING_ROOT="/workspaces/<PROJECT_NAME>/trading"
 
-  # Forward EODHD_API_KEY if set.
+  # Forward project-specific env vars to the container. Comma-separated list
+  # of names; defaults to empty. The source project (dayfine/trading) sets
+  # this to "EODHD_API_KEY" to forward its data-API key. Adapt to your
+  # project's secrets / API keys.
   DOCKER_ENV_FLAGS=""
-  if [ -n "${EODHD_API_KEY:-}" ]; then
-    DOCKER_ENV_FLAGS="-e EODHD_API_KEY"
-  fi
+  IFS=',' read -ra forward <<< "${RUN_IN_ENV_FORWARD:-}"
+  for var in "${forward[@]}"; do
+    [ -n "$var" ] && [ -n "${!var:-}" ] && DOCKER_ENV_FLAGS="$DOCKER_ENV_FLAGS -e $var"
+  done
   exec docker exec $DOCKER_ENV_FLAGS "$CONTAINER_NAME" bash -c \
     "cd $DOCKER_TRADING_ROOT && eval \$(opam env) && $*"
 fi

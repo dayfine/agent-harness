@@ -89,7 +89,7 @@ jobs:
       TRADING_IN_CONTAINER: "1"
       # Point data-dependent tests at the in-repo test fixtures (same as
       # ci.yml). Without this, Data_path.default_data_dir() falls back to
-      # the Docker-workspace path /workspaces/trading-1/data which does not
+      # the Docker-workspace path /workspaces/<PROJECT_NAME>/data which does not
       # exist in the GHA runner — health-scanner reports 7 test suites /
       # 38 assertion failures. See dev/daily/2026-04-16-run1.md escalation.
       TRADING_DATA_DIR: ${{ github.workspace }}/trading/test_data

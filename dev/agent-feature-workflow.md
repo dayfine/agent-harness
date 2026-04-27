@@ -36,7 +36,7 @@ Work **one module at a time**. Full cycle per module:
 Build/test inside Docker:
 ```bash
 docker exec <container-name> bash -c \
-  'cd /workspaces/trading-1/trading && eval $(opam env) && dune build && dune runtest'
+  'cd /workspaces/<PROJECT_NAME>/trading && eval $(opam env) && dune build && dune runtest'
 ```
 
 After each commit, tag the change with a per-module bookmark and push.
