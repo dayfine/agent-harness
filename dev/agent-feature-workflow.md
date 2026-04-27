@@ -1,5 +1,5 @@
 ---
-harness: reusable
+harness: template
 ---
 
 # Feature Agent Workflow

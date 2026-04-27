@@ -1,4 +1,5 @@
 #!/bin/sh
+# harness: reusable
 # agent-harness — scaffolding CLI for the Claude Code orchestration harness.
 #
 # Usage:
@@ -51,13 +52,14 @@ cmd_init() {
   echo "Bootstrapping agent-harness in $target..."
   
   # 1. Create directories
-  mkdir -p "$target/.agents/agents" "$target/.agents/rules" "$target/dev/lib" "$target/.github/workflows" "$target/.claude"
+  mkdir -p "$target/.agents/agents" "$target/.agents/rules" "$target/dev/lib" "$target/.github/workflows" "$target/.claude" "$target/bin"
   
   # 2. Copy files
   cp "$HARNESS_ROOT/.agents/agents/"*.md "$target/.agents/agents/"
   cp "$HARNESS_ROOT/.agents/rules/"*.md "$target/.agents/rules/"
   cp "$HARNESS_ROOT/.github/workflows/"*.yml "$target/.github/workflows/"
   cp "$HARNESS_ROOT/dev/lib/"*.sh "$target/dev/lib/"
+  cp "$HARNESS_ROOT/bin/agent-harness-check.sh" "$target/bin/"
   cp "$HARNESS_ROOT/dev/agent-feature-workflow.md" "$target/dev/"
   cp "$HARNESS_ROOT/dev/agent-feature-workflow-example.md" "$target/dev/"
   cp "$HARNESS_ROOT/.claude/settings.json" "$target/.claude/"

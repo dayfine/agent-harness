@@ -1,4 +1,5 @@
 #!/bin/sh
+# harness: reusable
 # Frontmatter linter for the agent-harness layer model.
 #
 # Verifies every .agents/agents/*.md and .agents/rules/*.md file has a
@@ -36,7 +37,7 @@ REPO_ROOT="$(repo_root)"
 # --- Collect candidate files ---
 
 MD_FILES=""
-for d in ".agents/agents" ".agents/rules"; do
+for d in ".agents/agents" ".agents/rules" "dev"; do
   if [ -d "$REPO_ROOT/$d" ]; then
     set +e
     found=$(find "$REPO_ROOT/$d" -maxdepth 1 -type f -name "*.md" 2>/dev/null)
@@ -47,10 +48,14 @@ $found"
 done
 
 SH_YML_FILES=""
-for d in ".github/workflows" "dev/lib"; do
+for d in ".github/workflows" "dev/lib" "bin"; do
   if [ -d "$REPO_ROOT/$d" ]; then
     set +e
-    found=$(find "$REPO_ROOT/$d" -maxdepth 1 -type f \( -name "*.sh" -o -name "*.yml" \) 2>/dev/null)
+    if [ "$d" = "bin" ]; then
+      found=$(find "$REPO_ROOT/$d" -maxdepth 1 -type f \( -name "*.sh" -o -name "*.yml" -o ! -name "*.*" \) ! -name "test-*.sh" 2>/dev/null)
+    else
+      found=$(find "$REPO_ROOT/$d" -maxdepth 1 -type f \( -name "*.sh" -o -name "*.yml" \) ! -name "test-*.sh" 2>/dev/null)
+    fi
     set -e
     [ -n "$found" ] && SH_YML_FILES="$SH_YML_FILES
 $found"
@@ -78,7 +83,7 @@ done
 
 # --- Check .sh / .yml files (header comment: `# harness: <value>`) ---
 for f in $SH_YML_FILES; do
-  marker=$(grep -m1 '#[[:space:]]*harness:[[:space:]]*' "$f" 2>/dev/null | sed 's/.*harness:[[:space:]]*//' | tr -d '[:space:]')
+  marker=$(grep -m1 '^#[[:space:]]*harness:[[:space:]]*' "$f" 2>/dev/null | sed 's/.*harness:[[:space:]]*//' | tr -d '[:space:]')
   case "$marker" in
     reusable) COUNT_REUSABLE=$((COUNT_REUSABLE + 1)) ;;
     template) COUNT_TEMPLATE=$((COUNT_TEMPLATE + 1)) ;;
