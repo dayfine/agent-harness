@@ -41,6 +41,6 @@ the project, one is about the agentic harness.
 
 ## Source
 
-Extracted from `dayfine/trading` on 2026-04-26 per
+Extracted from a production system on 2026-04-26 per
 `dev/plans/harness-template-extraction-2026-04-26.md` §Phase 2 in
 the source repo.

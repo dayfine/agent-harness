@@ -258,8 +258,8 @@ escalation "track <X> hitting stack cap with fresh root PR — consider raising
 These keep review queue backup visible without surprising the human.
 
 **This guard is PER TRACK, not per agent.** An agent that owns multiple
-tracks (e.g. `feat-weinstein` owns `portfolio-stops`, `simulation`,
-`short-side-strategy`) can be dispatched independently on each. Only the
+tracks (e.g. `feat-a` owns `track-1`, `track-2`,
+`track-3`) can be dispatched independently on each. Only the
 specific track with an open PR skips. Do not cascade "agent X has an open
 PR on track A" into "skip track B also owned by agent X."
 
@@ -540,8 +540,6 @@ not just "human decision required" — be specific.
 When dispatching:
 
 ```
-You are the data operations agent for the <PROJECT_NAME>.
-
 ## Task
 <describe the specific data operation: fetch, parse, inventory rebuild,
  source validation, plan execution, etc.>
@@ -555,8 +553,8 @@ Docker container: <container-name>
 
 When done:
 1. Update dev/notes/data-gaps.md to reflect what was resolved or what still blocks
-2. Run build_inventory.exe if any data was fetched
-3. Open the PR via `jst submit` for any branch you pushed
+2. Run inventory-rebuild if any data was fetched
+3. Open the PR via `<vcs_submit_tool>` for any branch you pushed
 4. Return: what changed, what still blocks, any errors, and the PR URL
 ```
 
@@ -589,7 +587,7 @@ matching entry (key on file path + finding type). If not, append:
 - [ ] <finding type>: <file path> — <one-line context> (source: <basename of source file>)
 ```
 
-Example: `- [ ] fn_length: trading/trading/weinstein/strategy/lib/weinstein_strategy.ml — module 320 lines, soft limit 300 (source: 2026-04-19-fast.md)`
+Example: `- [ ] fn_length: <path>/<module>.ext — module 320 lines, soft limit 300 (source: 2026-04-19-fast.md)`
 
 Do NOT delete or modify existing entries — `code-health` agent owns lifecycle (`[ ]` → `[~]` → `[x]`).
 
@@ -636,7 +634,7 @@ findings, skip 2e entirely (record "no cleanup work this run" in §Dispatched).
 
 Cross-track dependencies live in each status file's `## Blocked on` section. For every IN_PROGRESS track, read that section before dispatching:
 
-- If the blocker names another track's work (e.g. "requires feat-weinstein to add `Stops.support_floor` first"), **do not dispatch this track's agent this run**. Instead:
+- If the blocker names another track's work (e.g. "requires feat-a to add `Module.function` first"), **do not dispatch this track's agent this run**. Instead:
   1. Dispatch the upstream agent on the blocking item (the feat/ops/harness agent that owns the named work).
   2. Skip the downstream agent this run — it will pick up next run once the upstream item lands.
   3. Note the sequencing decision in the daily summary's §Dependency Unlocks section.
@@ -650,9 +648,9 @@ This is the orchestrator's job — do not pass the coordination decision to the 
 
 | Track | Owner | Typical blockers |
 |-------|-------|------------------|
-| feature-a | feat-agent | none |
+| track-a | feat-agent | none |
 | harness | harness-maintainer | none |
-| automation | harness-adjacent | human-only |
+| cleanup | code-health | none |
 
 Skip a track if its status file shows MERGED with no Blocking Refactors or Follow-up items, or APPROVED (awaiting human merge decision).
 
@@ -808,7 +806,7 @@ Dispatch shape depends on environment. Inspect `$PROJECT_IN_CONTAINER` (set by t
 
 **Throughput vs candidate comparison.** The cap values below assume a *throughput* dispatch pattern — each subagent implements a different track. They do NOT cover "run N candidates against the same problem, pick best." That's a separate mode with its own cap logic; not supported by this orchestrator today.
 
-### Local (TRADING_IN_CONTAINER unset)
+### Local ($PROJECT_IN_CONTAINER unset)
 
 - Use **jj** for VCS. No git worktree, no `isolation:` parameter on the Agent tool.
 - Cap: **2 parallel subagents** per Agent message. Each subagent creates its own jj workspace: `jj workspace add .agents/jj-ws/agent-<short-id> && cd .agents/jj-ws/agent-<short-id>`. Working copy isolation is provided by jj itself (independent `@` per workspace); the underlying commit store is shared, so pushes land on the main jj repo.
@@ -877,7 +875,7 @@ Your branch: feat/<feature>
   jj new feat/<feature>@origin
   # If bookmark doesn't exist yet: jj bookmark create feat/<feature> -r @
 
-  # GHA path (TRADING_IN_CONTAINER=1) — plain git, sequential, no isolation:
+  # GHA path (PROJECT_IN_CONTAINER=1) — plain git, sequential, no isolation:
   #   git fetch origin
   #   git checkout -b feat/<feature> origin/main
   # No workspace / worktree cleanup required.
@@ -914,7 +912,7 @@ COMMIT DISCIPLINE — this is critical for reviewability AND for surviving rate-
     Subsequent pushes update the PR automatically (same branch).
     If jst is not available, use the URL printed by `jj git push`:
       remote: Create a pull request for '<branch>' on GitHub by visiting:
-      remote:      https://github.com/dayfine/trading/pull/new/<branch>
+      remote:      https://github.com/<OWNER>/<REPO>/pull/new/<branch>
   - At session end, mark the PR ready for review via `<vcs_submit_cmd>`.
 
 MAX ITERATIONS — build-fix cycles:
@@ -940,9 +938,9 @@ Return a concise summary: what you completed, what's next, any blockers or quest
 ```
 
 Fill in the feature-specific constraint:
-- **weinstein (order_gen)**: "Do NOT modify existing Portfolio, Orders, or Position modules. order_gen is a pure formatter: input is Position.transition list, output is broker order suggestions, no sizing logic. See dev/decisions.md for the full spec — two prior attempts were closed for violating it."
-- **weinstein (Slice 2)**: "The Weinstein strategy must implement the existing STRATEGY module type. The Slice 2 design plan is in dev/status/simulation.md ## Next Steps — follow it exactly. The key design decisions (bar accumulation in closure, ?portfolio_value optional param) are documented there."
-- **backtest-infra**: "Pick the highest-leverage open item from dev/status/backtest-infra.md per the priority order in feat-backtest.md (Immediate first, then Medium-term, then Potential experiments). The flagship Immediate item is the stop-buffer tuning experiment — do that first if still open. Do NOT modify weinstein_strategy.ml or core stop-machine code; build alongside or propose the change in your status file."
+- **feature-a (sub-task)**: "Do NOT modify existing core modules. This task is a pure formatter: input is X, output is Y. See dev/decisions.md for the full spec."
+- **feature-b (Slice 2)**: "The strategy must implement the existing interface. The Slice 2 design plan is in dev/status/feature-b.md ## Next Steps — follow it exactly."
+- **maintenance-infra**: "Pick the highest-leverage open item from dev/status/maintenance-infra.md. Do NOT modify core modules; build alongside or propose the change in your status file."
 
 ### Refactor Mode prompt (use instead of above when dispatching a refactor work item)
 
@@ -1208,15 +1206,6 @@ agent didn't open as draft), the mutation is a no-op and returns
 **When to run:** after both QC stages complete (or after Stage 1 if behavioral
 was not run). Runs for both APPROVED and NEEDS_REWORK outcomes.
 
-Call `trading/devtools/checks/record_qc_audit.sh` to extract verdicts and
-quality score from `dev/reviews/<feature>.md` and write the structured audit
-record to `dev/audit/YYYY-MM-DD-<feature>.json`:
-
-```bash
-DATE="$(date +%Y-%m-%d)"
-FEATURE="<feature>"
-BRANCH="feat/<feature>"   # or harness/<name> for harness work
-
 bash dev/lib/record_qc_audit.sh "$FEATURE" "$BRANCH" "$DATE"
 ```
 
@@ -1433,20 +1422,17 @@ this doc was wrong). Trust only `BUILD_EXIT`.
 - Exit 0 → PASSING. Record in `## Health Scan` as `Result: CLEAN`.
 - Exit non-zero → FAILING. Surface in `## Escalations` as:
 
-  ```
   [critical] Main baseline RED — <test_cmd> exit <N>. Evidence:
   <paste the last ~20 lines of output, including failing rule name and exit code>
   ```
 
   **The pasted output is mandatory.** A `[critical]` that asserts the build or a
   specific linter is RED must include verbatim terminal output from this run's
-  invocation — not a quote from a prior run, not a `dev/status/` entry, not a
-  paraphrase. If you cannot paste the output (e.g. the check timed out), emit
+  invocation. If you cannot paste the output (e.g. the check timed out), emit
   `[info]` asking the human to verify, not `[critical]`. This rule exists because
   a stale-status citation in a `[critical]` can cascade into spurious track skips
-  and "Fail on escalations" gate failures on false premises — observed in GHA run
-  24688901975 (2026-04-20), where the agent quoted a pre-#461 status entry as
-  current fact. See: https://github.com/dayfine/trading/actions/runs/24688901975
+  and "Fail on escalations" gate failures on false premises.
+  See: https://github.com/<OWNER>/<REPO>/actions/runs/<RUN_ID>
 
 ### Step 6.2: Status file integrity check
 
@@ -1456,7 +1442,7 @@ INTEGRITY_EXIT=$?
 echo "status-integrity exit=$INTEGRITY_EXIT"
 ```
 
-This is already enforced by `dune runtest` (wired into `trading/devtools/checks/dune`),
+This is already enforced by the build gate (Step 6.1),
 so it will almost never fail here. Run it anyway to get a named finding if it does.
 
 - Exit 0 → PASSING. No entry needed in `## Health Scan`.
@@ -1535,9 +1521,9 @@ Parseable state table — one row per tracked non-MERGED track. "State" must be 
 One row per agent spawn (including skipped ones with reason). A subsequent run
 parses this table to detect redundant re-dispatch.
 
-**Track column uses TRACK NAMES only** (e.g. `backtest-infra`,
-`short-side-strategy`, `harness`, `ops-data`), never agent names
-(`feat-backtest`, `feat-weinstein`). When you skip a track because its
+**Track column uses TRACK NAMES only** (e.g. `feature-a`,
+`feature-b`, `harness`, `ops-data`), never agent names
+(`feat-a`, `feat-b`). When you skip a track because its
 owner agent has an open PR on a DIFFERENT track, the Track column stays
 the track being skipped; put the cross-track reason in Notes.
 
@@ -1663,7 +1649,7 @@ Count existing `dev/daily/${DATE}*.md` to pick the per-day session number N. Fir
 
 ## Step 8: Push the daily summary branch, open its PR, and auto-merge
 
-**GHA-only** (`$TRADING_IN_CONTAINER` set). In local runs, skip this step — the human reviews the file on disk and commits on their own cadence. In GHA the container dies at step exit, so an unpushed summary is lost. The workflow runtime no longer does this push for you (see PR #387); the orchestrator owns it.
+**GHA-only** (`$PROJECT_IN_CONTAINER` set). In local runs, skip this step — the human reviews the file on disk and commits on their own cadence. In GHA the container dies at step exit, so an unpushed summary is lost. The workflow runtime no longer does this push for you; the orchestrator owns it.
 
 ```bash
 # N = per-day session number from Step 7's filename.
@@ -1754,7 +1740,7 @@ if [ "$_N" -ge 3 ]; then
     || echo "WARN: consolidate_day.sh failed -- summary not included in PR"
   # The output file will be auto-snapshotted by jj into @ before the push;
   # in git-mode (GHA) we must add it explicitly.
-  if [ -n "${TRADING_IN_CONTAINER:-}" ]; then
+  if [ -n "${PROJECT_IN_CONTAINER:-}" ]; then
     git add "dev/daily/${DATE}-summary.md" 2>/dev/null || true
     git commit --amend --no-edit 2>/dev/null \
       || git commit -m "ops: add consolidated summary ${DATE}"

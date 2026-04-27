@@ -1,7 +1,7 @@
 # Daily orchestrator run on GitHub Actions.
 # harness: reusable
 # Runs `lead-orchestrator` via anthropics/claude-code-action inside the prebuilt
-# `trading-devcontainer` image (already has jj, jst, opam env baked in). The
+# `<PROJECT_NAME>-devcontainer` image (already has jj, jst, toolchain baked in). The
 # orchestrator writes its daily summary to `dev/daily/<date>-runN.md` and
 # whatever subagent work it dispatched to branches + PRs. A post-step pushes
 # the daily summary branch, opens a PR, then fails the job if the summary has
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     container:
-      image: ghcr.io/${{ github.repository_owner }}/trading-devcontainer:latest
+      image: ghcr.io/${{ github.repository_owner }}/<PROJECT_NAME>-devcontainer:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -83,16 +83,12 @@ jobs:
       options: --user 0
     env:
       HOME: /home/opam
-      # run-in-env.sh takes the native path (cd + opam env, no docker
+      # run-in-env.sh takes the native path (cd + env, no docker
       # wrapping) when this is set. Agent prompts invoke the wrapper so they
       # work identically in local-docker and in-container (GHA) environments.
-      TRADING_IN_CONTAINER: "1"
-      # Point data-dependent tests at the in-repo test fixtures (same as
-      # ci.yml). Without this, Data_path.default_data_dir() falls back to
-      # the Docker-workspace path /workspaces/<PROJECT_NAME>/data which does not
-      # exist in the GHA runner — health-scanner reports 7 test suites /
-      # 38 assertion failures. See dev/daily/2026-04-16-run1.md escalation.
-      TRADING_DATA_DIR: ${{ github.workspace }}/trading/test_data
+      PROJECT_IN_CONTAINER: "1"
+      # Point data-dependent tests at the in-repo test fixtures.
+      PROJECT_DATA_DIR: ${{ github.workspace }}/test_data
     steps:
       - uses: actions/checkout@v4
         with:

@@ -15,7 +15,7 @@ dev/plans/<feature-or-item>-<YYYY-MM-DD>.md
 
 Examples:
 - `backtest/stop-buffer-2026-04-15.md` — plan for the first stop-buffer tuning experiment
-- `weinstein/drawdown-breaker-2026-04-20.md` — plan for the drawdown circuit breaker
+- `feature/drawdown-breaker-2026-04-20.md` — plan for the drawdown circuit breaker
 
 ## Shape
 

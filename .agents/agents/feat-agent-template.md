@@ -61,7 +61,7 @@ Include a `## VCS choice (automatic)` section alongside the branch info:
 ```markdown
 ## VCS choice (automatic)
 
-If `$TRADING_IN_CONTAINER` is set (GHA runs), use **git** — jj is not
+If `$PROJECT_IN_CONTAINER` is set (GHA runs), use **git** — jj is not
 available. Each session: `git fetch origin && git checkout -b feat/<name> origin/main`.
 Commit with `git commit`, push with `git push origin HEAD`.
 
@@ -214,11 +214,9 @@ too. The orchestrator won't know about the track otherwise.
 
 Every feat-agent must respect the layer boundary:
 
-- Weinstein-specific logic belongs in new modules alongside the existing ones
-  (`trading/weinstein/`, `analysis/weinstein/`) — **not** inside the shared modules
-  (`Portfolio`, `Orders`, `Position`, `Strategy`, `Engine`)
-- If a change to a shared module is genuinely strategy-agnostic (i.e., it would
-  benefit any strategy, not just Weinstein), it is permitted — but the agent must
+- <PROJECT_NAME>-specific logic belongs in new modules alongside the existing ones — **not** inside the shared core modules.
+- If a change to a shared module is genuinely application-agnostic (i.e., it would
+  benefit any consumer), it is permitted — but the agent must
   note it explicitly in its status file and qc-behavioral will assess it
 - When in doubt: build alongside, don't modify
 

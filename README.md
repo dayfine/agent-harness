@@ -1,7 +1,6 @@
 # agent-harness
 
-Template / scaffolding for agentic coding harnesses built on
-[Claude Code](https://docs.claude.com/en/docs/claude-code/overview).
+Extracted from a production algorithmic trading system.
 
 This repo provides the generic orchestration layer — a set of agent
 definitions, rules, GitHub Actions workflows, and directory contracts —
@@ -166,7 +165,7 @@ All three subcommands are implemented and available in `v0.1.0`:
 
 ## Source
 
-Extracted from [`dayfine/trading`](https://github.com/dayfine/trading)
+Extracted from a production algorithmic trading system.
 on 2026-04-26. The `harness:` frontmatter on each source file was the
 strip filter — `reusable` and `template` files came along; `project`
 files stayed behind.
