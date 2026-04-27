@@ -134,39 +134,42 @@ many projects, contribute it back as a `harness: template` agent.
 
 ## Updating from upstream
 
-There is no automated sync. If this harness gets a generic improvement,
-manually cherry-pick the file change into your project (or vice versa).
-Drift is expected and acceptable for 1–2 consuming projects.
+Use `agent-harness sync` to pull in upstream improvements to
+`harness: reusable` files. Run from your consuming project's root:
 
-If multiple projects share this harness and drift becomes painful, a
-selective-sync CLI (`agent-harness sync --reusable-only`) is the next
-step — see "Planned tooling".
+```bash
+agent-harness sync
+```
 
-## Planned tooling
+The tool clones the upstream repo at the pinned `AGENT_HARNESS_TAG`
+(defaults to `main`), diffs each reusable file, and presents a
+per-file `[y/N/skip]` prompt. Local frontmatter is always preserved;
+only the body content is updated.
 
-Not yet implemented; tracked in the source repo's plan
-`dev/plans/harness-template-extraction-2026-04-26.md`:
+```bash
+# Pin to a specific release
+AGENT_HARNESS_TAG=v0.1.0 agent-harness sync
 
-- `bin/agent-harness init <target-dir>` — clones this template into a
-  target dir, drops any leaked `harness: project` files, prompts for
-  `<TODO>` placeholder values.
-- `bin/agent-harness sync --reusable-only` — diffs each
-  `harness: reusable` file in the target against this upstream and
-  presents per-file y/n/skip merges.
-- `bin/agent-harness check` — verifies every `.agents/agents/*.md` and
-  `.agents/rules/*.md` carries a `harness:` frontmatter line.
+# Use a local clone (no network required)
+AGENT_HARNESS_UPSTREAM=../agent-harness agent-harness sync
+```
+
+## CLI tooling
+
+All three subcommands are implemented and available in `v0.1.0`:
+
+| Command | Description |
+|---|---|
+| `agent-harness init <target-dir>` | Bootstrap a new project from this template |
+| `agent-harness sync` | Interactively pull `harness: reusable` updates from upstream |
+| `agent-harness check` | Verify every agent/rule/workflow/script carries a `harness:` tag |
 
 ## Source
 
 Extracted from [`dayfine/trading`](https://github.com/dayfine/trading)
-on 2026-04-26 per the bootstrap plan
-`dev/plans/harness-template-extraction-2026-04-26.md` §Phase 2.
-
-The `harness:` frontmatter on each source file was the strip filter —
-`reusable` and `template` files came along; `project` files stayed
-behind. See that plan for the full history of why the harness was split
-this way and what's still TODO (CLI, settings.json template, license
-decision for consuming projects, second-project bootstrap test).
+on 2026-04-26. The `harness:` frontmatter on each source file was the
+strip filter — `reusable` and `template` files came along; `project`
+files stayed behind.
 
 ## License
 
