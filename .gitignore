@@ -1,0 +1,9 @@
+# Claude Code session state — per-developer, not for the harness repo.
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+.claude/worktrees/
+
+# OS / editor cruft
+.DS_Store
+*.swp
+*~

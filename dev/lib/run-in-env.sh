@@ -1,5 +1,28 @@
 #!/usr/bin/env bash
-# Run a command in the Trading dev environment.
+# Run a command in the dev environment.
+#
+# ============================================================================
+# EXAMPLE — adapt to your project's toolchain.
+#
+# This script ships with the agent-harness as the OCaml + Dune + Docker
+# wrapper that the source project (dayfine/trading) uses. The pattern
+# (in-container path vs local-docker path, with a dune-workspace check)
+# is reusable; the toolchain calls (opam env, dune-workspace) are not.
+#
+# When porting:
+# 1. Replace `eval "$(opam env)"` with your toolchain init (cargo,
+#    nvm use, source venv, etc.) or remove if not needed.
+# 2. Replace `dune-workspace` existence check with your project's
+#    workspace root marker (Cargo.toml, package.json, pyproject.toml).
+# 3. Replace TRADING_CONTAINER_NAME default with your container name.
+# 4. Replace TRADING_IN_CONTAINER env-var name with your project's
+#    equivalent, or rename to something generic like AGENT_HARNESS_IN_ENV.
+# 5. Replace /workspaces/trading-1 docker-root path with your container's
+#    mount point.
+#
+# The split between in-container (GHA / devcontainer) and local-docker
+# (developer machine) is the load-bearing pattern; the rest is example.
+# ============================================================================
 #
 # Usage:
 #   dev/lib/run-in-env.sh dune build
