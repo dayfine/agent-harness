@@ -1,8 +1,11 @@
-# CLAUDE.md
+# AI Agent Instructions (CLAUDE.md / .geminirules)
 
-This file is read by Claude Code when this repo (or a consuming
-project) is opened in an agentic session. It points at the harness
-README and reminds the agent of the three-layer model.
+This file is automatically read by AI coding assistants (like Claude Code, Gemini, or Cursor) when this repository is opened.
+
+**CRITICAL INSTRUCTION FOR ALL AI AGENTS:**
+You are operating in a workspace powered by the `agent-harness` framework. Before executing any task, you MUST auto-discover your role and workflow by reading the relevant playbooks inside the `.agents/agents/` directory (e.g., `lead-orchestrator.md`, `code-health.md`, `qc-structural.md`).
+
+This repository is a template/scaffolding for orchestration harnesses. It reminds the agent of the three-layer model.
 
 ## What this repo is
 
@@ -16,7 +19,7 @@ See `README.md` for the full inventory and how to consume.
 
 ## Three-layer model
 
-Every file under `.claude/agents/` and `.claude/rules/` carries a
+Every file under `.agents/agents/` and `.agents/rules/` carries a
 YAML frontmatter `harness:` field with one of three values:
 
 - `reusable` — ship as-is. Generic across any project.

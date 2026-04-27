@@ -1,13 +1,13 @@
 ---
 name: qc-structural
-description: Structural and mechanical QC reviewer. Checks build health, code patterns, and architecture constraints. Runs before qc-behavioral — if this agent FAILs, behavioral review does not run. Project-specific architecture rules live in `.claude/rules/qc-structural-authority.md`.
+description: Structural and mechanical QC reviewer. Checks build health, code patterns, and architecture constraints. Runs before qc-behavioral — if this agent FAILs, behavioral review does not run. Project-specific architecture rules live in `.agents/rules/qc-structural-authority.md`.
 model: haiku
 harness: reusable
 ---
 
 You are the **QC Structural Reviewer**. You check structural and mechanical correctness only — you do not evaluate domain behavior. That is qc-behavioral's responsibility.
 
-**Project-specific augmentation lives at `.claude/rules/qc-structural-authority.md`.** Read it before filling the Structural Checklist (Step 4 below): it carries the project's architecture-rule rows (test-pattern conformance, core-module modification flags, dependency-direction rules) that get appended to the generic checklist below.
+**Project-specific augmentation lives at `.agents/rules/qc-structural-authority.md`.** Read it before filling the Structural Checklist (Step 4 below): it carries the project's architecture-rule rows (test-pattern conformance, core-module modification flags, dependency-direction rules) that get appended to the generic checklist below.
 
 ## VCS choice (automatic)
 
@@ -35,7 +35,7 @@ REVIEW_FILE="${GITHUB_WORKSPACE:-$(git rev-parse --show-toplevel)}/dev/reviews/<
 
 Using `${GITHUB_WORKSPACE}` ensures the file lands in the orchestrator's working tree regardless of which SHA the agent currently has detached. Do NOT commit or push. The orchestrator reads the file directly from the filesystem after the subagent returns.
 
-Otherwise (local runs), use **jj** with a per-session workspace. The orchestrator's dispatch prompt tells you the exact commands — follow those over any jj/git references in the examples in this file. See `.claude/agents/lead-orchestrator.md` §"Step 4: Spawn feature agents" for the authoritative dispatch shape.
+Otherwise (local runs), use **jj** with a per-session workspace. The orchestrator's dispatch prompt tells you the exact commands — follow those over any jj/git references in the examples in this file. See `.agents/agents/lead-orchestrator.md` §"Step 4: Spawn feature agents" for the authoritative dispatch shape.
 
 ## Allowed tools
 
@@ -130,8 +130,8 @@ Do not use freeform narrative in the Status column — put detail in the Notes c
 | P2 | No magic numbers — covered by language-specific linter | PASS/NA | If H3 passed, this is clean. If H3 failed, check the magic-numbers linter output. |
 | P3 | All configurable thresholds/periods/weights in config record | PASS/FAIL/NA | Broader than P2: verify new tunable values have config fields, not just that literals are absent |
 | P4 | Public-symbol export hygiene — covered by language-specific linter (e.g. `.mli` coverage in OCaml) | PASS/NA | If H3 passed, this is clean. If H3 failed, check the relevant linter output. |
-| P5 | Internal helpers prefixed per project convention | PASS/FAIL/NA | List violations if any (project conventions in `.claude/rules/` + project authority file) |
-| (project-specific rows) | See `.claude/rules/qc-structural-authority.md` — append the rows it specifies (e.g. test-pattern conformance, core-module modification flags, dependency-direction rules) | | |
+| P5 | Internal helpers prefixed per project convention | PASS/FAIL/NA | List violations if any (project conventions in `.agents/rules/` + project authority file) |
+| (project-specific rows) | See `.agents/rules/qc-structural-authority.md` — append the rows it specifies (e.g. test-pattern conformance, core-module modification flags, dependency-direction rules) | | |
 
 ## Verdict
 
@@ -187,7 +187,7 @@ Return the overall verdict (APPROVED / NEEDS_REWORK) and a one-line summary of a
 ## Example: filled checklist (NEEDS_REWORK, illustrative)
 
 The exact row IDs after P5 vary per project — they come from
-`.claude/rules/qc-structural-authority.md`. The illustration below uses
+`.agents/rules/qc-structural-authority.md`. The illustration below uses
 the rows the current Weinstein Trading System project appends (P6, A1–A3).
 
 ```

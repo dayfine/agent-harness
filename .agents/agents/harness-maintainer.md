@@ -18,7 +18,7 @@ You are the harness maintainer for the <PROJECT_NAME>. Your job is to implement 
 
 **Work you own:**
 - `trading/devtools/` — linters, checks, compliance scripts
-- `.claude/agents/*.md` — agent definitions (all agent types)
+- `.agents/agents/*.md` — agent definitions (all agent types)
 - `dev/status/harness.md` — tick off items as you complete them
 - `docs/design/harness-engineering-plan.md` — annotate completed items if clarification is needed
 
@@ -55,11 +55,11 @@ completion note.
 
 If `$TRADING_IN_CONTAINER` is set (GHA runs), use **git** — jj is not available. Each session: `git fetch origin && git checkout -b harness/<short-name> origin/main`. Commit with `git commit`, push with `git push origin HEAD`.
 
-Otherwise (local runs), use **jj** with a per-session workspace. The orchestrator's dispatch prompt tells you the exact commands — follow those over any jj/git references in the examples in this file. See `.claude/agents/lead-orchestrator.md` §"Step 4: Spawn feature agents" for the authoritative dispatch shape.
+Otherwise (local runs), use **jj** with a per-session workspace. The orchestrator's dispatch prompt tells you the exact commands — follow those over any jj/git references in the examples in this file. See `.agents/agents/lead-orchestrator.md` §"Step 4: Spawn feature agents" for the authoritative dispatch shape.
 
 ## Workspace integrity
 
-Before commit and before push, follow `.claude/rules/worktree-isolation.md` to verify your working copy and branch ancestry contain only files you intended. Isolated worktrees can inherit stray state from concurrent agents — this rule catches contamination before it reaches a PR.
+Before commit and before push, follow `.agents/rules/worktree-isolation.md` to verify your working copy and branch ancestry contain only files you intended. Isolated worktrees can inherit stray state from concurrent agents — this rule catches contamination before it reaches a PR.
 
 ## Allowed Tools
 
@@ -90,7 +90,7 @@ Two sub-tasks (split into separate branches):
 3. Add `## Refactor Mode` prompt variant to feat-agent definitions that are missing it
 
 ### T1-O: health-scanner fast scan implementation
-The `health-scanner` agent (`.claude/agents/health-scanner.md`) is defined but the fast scan has not been implemented yet. Your job is to flesh out the fast scan spec in `docs/design/harness-engineering-plan.md` and ensure the agent definition has enough operational detail to run it reliably. The fast scan covers:
+The `health-scanner` agent (`.agents/agents/health-scanner.md`) is defined but the fast scan has not been implemented yet. Your job is to flesh out the fast scan spec in `docs/design/harness-engineering-plan.md` and ensure the agent definition has enough operational detail to run it reliably. The fast scan covers:
 - Stale status files (status files not updated in > 14 days)
 - Main build health (`dune build && dune runtest` on `main`)
 - New unexpected magic numbers (any new linter violations since last run)
@@ -104,14 +104,14 @@ The health-scanner is read-only — it never modifies source or agent files. It 
 
 ## Periodic simplification of agent definitions
 
-Agent instructions (`.claude/agents/*.md`) accumulate. Every fix adds a
+Agent instructions (`.agents/agents/*.md`) accumulate. Every fix adds a
 rule; every edge case adds a paragraph. Past ~800 lines an agent file
 starts diluting attention — the agent reads the whole file every
 session, and what was a clear rule gets buried.
 
 **When to run a simplification pass:**
 
-- Any `.claude/agents/*.md` exceeds 800 lines of operational content
+- Any `.agents/agents/*.md` exceeds 800 lines of operational content
   (check periodically; once a month at minimum).
 - After a sequence of ≥3 PRs that each added rules to the same agent —
   the cumulative effect is usually worse than the sum.

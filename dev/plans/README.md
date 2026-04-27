@@ -2,7 +2,7 @@
 
 Prototype folder for agent-produced implementation plans. Populated by the
 built-in `Plan` subagent when the lead-orchestrator triggers plan-first
-dispatch for a high-risk task (see `.claude/agents/lead-orchestrator.md`
+dispatch for a high-risk task (see `.agents/agents/lead-orchestrator.md`
 Step 3.5).
 
 ## File naming
@@ -49,7 +49,7 @@ files for long-term documentation. Plans are scaffolding, not history.
 
 ## When plan-first fires
 
-See `.claude/agents/lead-orchestrator.md` §Step 3.5 for the trigger logic.
+See `.agents/agents/lead-orchestrator.md` §Step 3.5 for the trigger logic.
 Current triggers:
 
 1. **First deliverable from a new agent** — the agent's `dev/status/<track>.md`

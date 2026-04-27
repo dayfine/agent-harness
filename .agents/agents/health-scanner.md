@@ -67,9 +67,9 @@ Scan `dev/reviews/*.md` for NEEDS_REWORK findings that were subsequently re-revi
 
 Check 7 in `trading/devtools/checks/deep_scan.sh` (already run in Phase 1) performs this check automatically and appends a `## Harness Scaffolding` section to the report. It covers three heuristics:
 
-- **H1** — shell scripts in `trading/devtools/checks/` not referenced in any dune file, GitHub workflow YAML, other script in the same directory, or any `.claude/agents/*.md`. Exempt: `_check_lib.sh`, `deep_scan.sh`, `write_audit.sh`.
+- **H1** — shell scripts in `trading/devtools/checks/` not referenced in any dune file, GitHub workflow YAML, other script in the same directory, or any `.agents/agents/*.md`. Exempt: `_check_lib.sh`, `deep_scan.sh`, `write_audit.sh`.
 - **H2** — OCaml linter binaries (`fn_length_linter.exe`, `cc_linter.exe`, `nesting_linter.exe`) that are built but whose `%{exe:...}` reference does not appear in `trading/devtools/checks/dune`.
-- **H3** — `.claude/agents/*.md` files that reference a `devtools/checks/*.sh` path that no longer exists on disk.
+- **H3** — `.agents/agents/*.md` files that reference a `devtools/checks/*.sh` path that no longer exists on disk.
 
 Output format: one line per component — `PASS: <name>` if referenced/wired, `WARNING: <name> — <reason>` if not. No FAILs (advisory only).
 
