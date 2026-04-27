@@ -1,9 +1,10 @@
 #!/bin/sh
 # Frontmatter linter for the agent-harness layer model.
 #
-# Verifies every .agents/agents/*.md and .agents/rules/*.md file in the
-# repository has a `harness:` field with a recognised value. Fails fast
-# with the offending file paths if anything is missing or malformed.
+# Verifies every .agents/agents/*.md and .agents/rules/*.md file has a
+# `harness:` field, and every .github/workflows/*.yml and dev/lib/*.sh file
+# has a `# harness:` comment with a recognised value. Fails fast with the
+# offending file paths if anything is missing or malformed.
 #
 # Run from the consuming project's root:
 #   sh bin/agent-harness-check.sh
@@ -31,35 +32,40 @@ repo_root() {
 }
 
 REPO_ROOT="$(repo_root)"
-PATTERNS=".agents/agents .agents/rules"
-EXIT=0
 
-# Collect candidate files. Both directories may not exist in a fresh
-# project — that's fine, just means nothing to lint.
-FILES=""
-for d in $PATTERNS; do
+# --- Collect candidate files ---
+
+MD_FILES=""
+for d in ".agents/agents" ".agents/rules"; do
   if [ -d "$REPO_ROOT/$d" ]; then
     set +e
     found=$(find "$REPO_ROOT/$d" -maxdepth 1 -type f -name "*.md" 2>/dev/null)
     set -e
-    [ -n "$found" ] && FILES="$FILES
+    [ -n "$found" ] && MD_FILES="$MD_FILES
 $found"
   fi
 done
 
-if [ -z "$FILES" ]; then
-  echo "agent-harness-check: no .agents/agents or .agents/rules files to check."
-  exit 0
-fi
+SH_YML_FILES=""
+for d in ".github/workflows" "dev/lib"; do
+  if [ -d "$REPO_ROOT/$d" ]; then
+    set +e
+    found=$(find "$REPO_ROOT/$d" -maxdepth 1 -type f \( -name "*.sh" -o -name "*.yml" \) 2>/dev/null)
+    set -e
+    [ -n "$found" ] && SH_YML_FILES="$SH_YML_FILES
+$found"
+  fi
+done
 
+EXIT=0
 MISSING=""
 INVALID=""
 COUNT_REUSABLE=0
 COUNT_TEMPLATE=0
 COUNT_PROJECT=0
 
-# shellcheck disable=SC2086  # word-splitting on FILES is intentional
-for f in $FILES; do
+# --- Check .md files (YAML frontmatter: `harness: <value>`) ---
+for f in $MD_FILES; do
   marker=$(awk '/^harness:[[:space:]]*/{print $2; exit}' "$f")
   case "$marker" in
     reusable) COUNT_REUSABLE=$((COUNT_REUSABLE + 1)) ;;
@@ -70,6 +76,19 @@ for f in $FILES; do
   esac
 done
 
+# --- Check .sh / .yml files (header comment: `# harness: <value>`) ---
+for f in $SH_YML_FILES; do
+  marker=$(grep -m1 '#[[:space:]]*harness:[[:space:]]*' "$f" 2>/dev/null | sed 's/.*harness:[[:space:]]*//' | tr -d '[:space:]')
+  case "$marker" in
+    reusable) COUNT_REUSABLE=$((COUNT_REUSABLE + 1)) ;;
+    template) COUNT_TEMPLATE=$((COUNT_TEMPLATE + 1)) ;;
+    project)  COUNT_PROJECT=$((COUNT_PROJECT + 1)) ;;
+    "")       MISSING="$MISSING $f" ;;
+    *)        INVALID="$INVALID $f($marker)" ;;
+  esac
+done
+
+# --- Report ---
 if [ -n "$MISSING" ]; then
   echo "FAIL: agent-harness-check — missing harness: field in:" >&2
   for f in $MISSING; do echo "  $f" >&2; done

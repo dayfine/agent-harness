@@ -1,5 +1,5 @@
 # Weekly deep health scan for the Weinstein Trading System.
-#
+# harness: reusable
 # Dispatches the `health-scanner` agent in deep mode every Monday. The
 # resulting dev/health/<YYYY-MM-DD>-deep.md report lands on a branch
 # ops/health-deep-<YYYY-MM-DD> and opens a PR for human review.

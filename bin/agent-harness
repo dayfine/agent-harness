@@ -3,7 +3,7 @@
 #
 # Usage:
 #   agent-harness init <target-dir>          Bootstrap a new project from this template.
-#   agent-harness sync --reusable-only       Update `harness: reusable` files from upstream.
+#   agent-harness sync                       Update `harness: reusable` files from upstream.
 #   agent-harness check                      Verify the layer model (delegates to agent-harness-check.sh).
 #   agent-harness help                       This message.
 #
@@ -25,7 +25,7 @@ agent-harness — scaffolding CLI for the Claude Code orchestration harness.
 
 Usage:
   agent-harness init <target-dir>      Bootstrap a new project from this template.
-  agent-harness sync --reusable-only   Update `harness: reusable` files from upstream.
+  agent-harness sync                   Update `harness: reusable` files from upstream.
   agent-harness check                  Verify the layer model.
   agent-harness help                   This message.
 
@@ -89,7 +89,7 @@ EOF
 }
 
 cmd_sync() {
-  exec python3 "$SCRIPT_DIR/agent-harness-sync.py" "$@"
+  exec sh "$SCRIPT_DIR/agent-harness-sync.sh" "$@"
 }
 
 case "${1:-help}" in
