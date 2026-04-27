@@ -83,8 +83,8 @@ There is no published CLI yet (planned: `bin/agent-harness init` — see
 5. Write any `feat-<name>.md` agents your project needs (one per track).
    These are `harness: project`.
 6. Adjust `dev/agent-feature-workflow.md` for your toolchain. The
-   shipped version assumes OCaml + Dune + jj + Docker; edit to match
-   your stack.
+   shipped version is tool-agnostic with placeholders; edit to match
+   your stack. (See `dev/agent-feature-workflow-example.md` for inspiration).
 
 ## Intake sources — single-dev vs public-user projects
 
