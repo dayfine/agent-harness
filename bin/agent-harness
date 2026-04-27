@@ -59,6 +59,7 @@ cmd_init() {
   cp "$HARNESS_ROOT/.github/workflows/"*.yml "$target/.github/workflows/"
   cp "$HARNESS_ROOT/dev/lib/"*.sh "$target/dev/lib/"
   cp "$HARNESS_ROOT/dev/agent-feature-workflow.md" "$target/dev/"
+  cp "$HARNESS_ROOT/dev/agent-feature-workflow-example.md" "$target/dev/"
   cp "$HARNESS_ROOT/.claude/settings.json" "$target/.claude/"
   cp "$HARNESS_ROOT/.antigravityignore" "$target/"
   cp "$HARNESS_ROOT/CLAUDE.md" "$target/"
@@ -81,7 +82,7 @@ Next steps:
   3. Write any feat-* agents your project needs as
      $target/.agents/agents/feat-<name>.md (mark harness: project).
   4. Edit $target/dev/agent-feature-workflow.md for your toolchain
-     (the shipped version assumes OCaml + Dune + jj + Docker).
+     (the shipped version is generic; see dev/agent-feature-workflow-example.md).
   5. Run agent-harness check to verify the layer model.
 EOF
   exit 0
