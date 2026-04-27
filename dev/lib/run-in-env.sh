@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# harness: reusable
 # Run a command in the dev environment.
 #
 # ============================================================================

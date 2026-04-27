@@ -1,5 +1,5 @@
 # Daily orchestrator run on GitHub Actions.
-#
+# harness: reusable
 # Runs `lead-orchestrator` via anthropics/claude-code-action inside the prebuilt
 # `trading-devcontainer` image (already has jj, jst, opam env baked in). The
 # orchestrator writes its daily summary to `dev/daily/<date>-runN.md` and

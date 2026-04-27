@@ -1,3 +1,4 @@
+# harness: reusable
 name: Harness Check
 
 on:
