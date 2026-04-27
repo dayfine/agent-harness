@@ -32,7 +32,7 @@ Usage:
 Subcommand status:
   check    — implemented (delegates to bin/agent-harness-check.sh).
   init     — implemented.
-  sync     — STUB. Manually cherry-pick from upstream for now.
+  sync     — implemented.
 EOF
 }
 
@@ -89,22 +89,7 @@ EOF
 }
 
 cmd_sync() {
-  cat <<'EOF' >&2
-agent-harness sync: not yet implemented.
-
-Manual sync recipe (until automated):
-  1. cd into the upstream agent-harness clone.
-  2. git log --since=<last-sync-date> --diff-filter=AM --pretty=format:"%h %s" \
-       -- .agents/agents/ .agents/rules/ dev/lib/ .github/workflows/
-  3. For each commit affecting `harness: reusable` files, cherry-pick
-     manually into your project: git format-patch <sha> -1 -o /tmp/
-     then in your project: git am -3 /tmp/<patch>.
-  4. Resolve any conflicts. The upstream version wins for
-     `harness: reusable` content; your project's version wins for
-     `harness: project` content.
-  5. Run agent-harness check to confirm tags are intact.
-EOF
-  exit 1
+  exec python3 "$SCRIPT_DIR/agent-harness-sync.py" "$@"
 }
 
 case "${1:-help}" in
