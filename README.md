@@ -86,6 +86,52 @@ There is no published CLI yet (planned: `bin/agent-harness init` — see
    shipped version assumes OCaml + Dune + jj + Docker; edit to match
    your stack.
 
+## Intake sources — single-dev vs public-user projects
+
+The shipped harness assumes a **single-developer model**: the human
+maintains `dev/status/<track>.md` files as the canonical source of
+"what's being worked on." The orchestrator reads those files at the
+start of every session, picks the highest-priority open item per
+track, and dispatches `feat-*` agents accordingly.
+
+Projects with **public users** have a second input stream — GitHub
+Issues (or the equivalent: project board, milestones, external
+ticket system). Issues are not in `dev/status/`; they arrive
+asynchronously, at unpredictable cadence, and not every Issue is a
+real track. Consuming the harness in such a project needs an
+explicit **triage layer** between the Issue stream and the
+orchestrator's status-driven loop.
+
+Two ways to wire this in:
+
+**Option A — Issues are the canonical source.** Every track in
+`dev/status/` corresponds to one Issue (or epic). The orchestrator's
+Step-2 read becomes "list open Issues with label `track`," and
+`dev/status/` is regenerated from that or skipped entirely. The
+single-dev model collapses to a special case.
+
+**Option B — Issues feed `dev/status/` via triage.** A separate
+`intake-triage` agent (template provided as `feat-agent-template.md`'s
+sibling — copy it and customise) polls Issues, classifies each (bug
+fix → `cleanup/<short>` branch via code-health; feature → new
+`dev/status/<track>.md` file; question → close with response;
+duplicate → close), and writes status entries the orchestrator then
+picks up. The orchestrator's logic doesn't change.
+
+For 1–10 issues/month, Option B with a once-a-day triage subagent is
+simpler. For higher volume, Option A keeps the Issues board as the
+single source of truth.
+
+The harness ships **neither** by default. Add what your project needs:
+
+```
+.claude/agents/intake-triage.md     # harness: project — your triage rules
+dev/intake/                         # optional dir for cached/processed Issue state
+```
+
+If you write a generic-enough intake-triage template that works for
+many projects, contribute it back as a `harness: template` agent.
+
 ## Updating from upstream
 
 There is no automated sync. If this harness gets a generic improvement,
