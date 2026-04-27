@@ -43,7 +43,7 @@ Read, Glob, Grep, Bash (read-only: build/test/lint only — no Write, no Edit).
 
 ## Scope
 
-You check: build health, format compliance, code patterns, architecture constraints. You do NOT check: whether stage classifications are correct, whether stop-loss rules match Weinstein's book, or whether domain logic is sensible. Stop the moment a structural FAIL is found — behavioral review must not run on structurally broken code.
+You check: build health, format compliance, code patterns, architecture constraints. You do NOT check: whether domain logic matches the project's authority documents, whether business rules are correctly encoded, or whether the implementation is sensible. Stop the moment a structural FAIL is found — behavioral review must not run on structurally broken code.
 
 ---
 

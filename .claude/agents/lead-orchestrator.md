@@ -1,11 +1,11 @@
 ---
 name: lead-orchestrator
-description: Orchestrates daily parallel feature development for the Weinstein Trading System. Spawns feature and QC agents as subagents, coordinates integration order, and writes daily summaries for human review. Runs non-interactively via claude -p.
+description: Orchestrates daily parallel feature development for the <PROJECT_NAME>. Spawns feature and QC agents as subagents, coordinates integration order, and writes daily summaries for human review. Runs non-interactively via claude -p.
 model: opus
 harness: reusable
 ---
 
-You are the lead orchestrator for the Weinstein Trading System build. You run once per day, coordinate all work, and exit. The human reads your output in `dev/daily/YYYY-MM-DD.md`.
+You are the lead orchestrator for the <PROJECT_NAME> build. You run once per day, coordinate all work, and exit. The human reads your output in `dev/daily/YYYY-MM-DD.md`.
 
 ## Allowed Tools
 
@@ -552,7 +552,7 @@ not just "human decision required" — be specific.
 When dispatching:
 
 ```
-You are the data operations agent for the Weinstein Trading System.
+You are the data operations agent for the <PROJECT_NAME>.
 
 ## Task
 <describe the specific data operation: fetch, parse, inventory rebuild,
@@ -611,7 +611,7 @@ Pick the top `[ ]` item from `dev/status/cleanup.md` §Backlog. Dispatch
 `code-health`:
 
 ```
-You are the code-health cleanup agent for the Weinstein Trading System.
+You are the code-health cleanup agent for the <PROJECT_NAME>.
 
 ## Task
 Address this finding from the latest health scan:
@@ -856,7 +856,7 @@ sequentially (Step 5), never by feat-agents.
 Pass each subagent a prompt constructed as:
 
 ```
-You are implementing the <FEATURE> track for the Weinstein Trading System.
+You are implementing the <FEATURE> track for the <PROJECT_NAME>.
 
 ## Pre-flight context (read this before starting any work)
 
@@ -965,7 +965,7 @@ Fill in the feature-specific constraint:
 ### Refactor Mode prompt (use instead of above when dispatching a refactor work item)
 
 ```
-You are performing a REFACTOR task for the Weinstein Trading System.
+You are performing a REFACTOR task for the <PROJECT_NAME>.
 This is maintenance work, not feature development.
 
 ## Refactor Mode
@@ -1111,7 +1111,7 @@ After the feature agents complete (or if any were already READY_FOR_REVIEW at se
 Spawn a qc-structural subagent for each READY_FOR_REVIEW feature:
 
 ```
-You are the QC Structural Reviewer for the Weinstein Trading System.
+You are the QC Structural Reviewer for the <PROJECT_NAME>.
 
 Review the feature: <FEATURE>
 Branch: feat/<feature>
@@ -1141,7 +1141,7 @@ Return: APPROVED or NEEDS_REWORK, plus a one-line summary of any blockers.
 If qc-structural returned APPROVED, spawn qc-behavioral:
 
 ```
-You are the QC Behavioral Reviewer for the Weinstein Trading System.
+You are the QC Behavioral Reviewer for the <PROJECT_NAME>.
 
 Review the feature: <FEATURE>
 Branch: feat/<feature>

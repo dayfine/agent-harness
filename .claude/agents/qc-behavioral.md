@@ -78,7 +78,7 @@ Note: `dev/reviews/<feature>.md` starts with a `Reviewed SHA:` line pinned by qc
 
 ### Step 3: Fill in the checklists
 
-Fill the **Contract Pinning Checklist** (CP1–CP4) first — it applies to every PR regardless of subsystem. Read the PR body, the new `.mli` files, and the test files in the diff to verify each claim. Then fill the **Behavioral Checklist** (A1, S*/L*/C*/T* rows) for Weinstein-specific logic. Every claim must be traceable to a specific section of the authority document. Use Grep to find the implementation evidence.
+Fill the **Contract Pinning Checklist** (CP1–CP4) first — it applies to every PR regardless of subsystem. Read the PR body, the new `.mli` files, and the test files in the diff to verify each claim. Then fill the project's **Behavioral Checklist** rows (defined in `.claude/rules/qc-behavioral-authority.md` — typically domain-specific gates like stage classification, stop rules, or screener cascade for a trading project). Every claim must be traceable to a specific section of the authority document. Use Grep to find the implementation evidence.
 
 ### Step 4: Assign a quality score
 
@@ -100,9 +100,9 @@ After filling the checklist, assign a quality score (1–5) with a brief rationa
 
 ## Contract Pinning Checklist
 
-This section applies to **every PR**, regardless of subsystem. Fill it before the Weinstein-specific rows. NA is only valid for CP1 when no new `.mli` is added; CP2 NA when the PR body has no "Test plan" / "Test coverage" section; CP3/CP4 NA when no pass-through or guarded behavior exists.
+This section applies to **every PR**, regardless of subsystem. Fill it before the project's domain-specific rows (in `.claude/rules/qc-behavioral-authority.md`). NA is only valid for CP1 when no new `.mli` is added; CP2 NA when the PR body has no "Test plan" / "Test coverage" section; CP3/CP4 NA when no pass-through or guarded behavior exists.
 
-Any CP* FAIL is a FAIL for overall verdict — same mechanical rule as S*/L*/C*/T*.
+Any CP* FAIL is a FAIL for overall verdict — same mechanical rule as the project's domain rows.
 
 ```
 ## Contract Pinning Checklist
