@@ -31,7 +31,7 @@ Usage:
 
 Subcommand status:
   check    — implemented (delegates to bin/agent-harness-check.sh).
-  init     — STUB. Manually copy the template files for now.
+  init     — implemented.
   sync     — STUB. Manually cherry-pick from upstream for now.
 EOF
 }
@@ -47,33 +47,44 @@ cmd_init() {
     echo "usage: agent-harness init <target-dir>" >&2
     exit 1
   fi
-  cat <<EOF >&2
-agent-harness init: not yet implemented.
 
-Manual bootstrap recipe:
-  1. mkdir -p $target/.claude/agents $target/.claude/rules $target/dev/lib $target/.github/workflows
-  2. Copy from this template:
-     cp $HARNESS_ROOT/.claude/agents/*.md $target/.claude/agents/
-     cp $HARNESS_ROOT/.claude/rules/*.md $target/.claude/rules/
-     cp $HARNESS_ROOT/.github/workflows/*.yml $target/.github/workflows/
-     cp $HARNESS_ROOT/dev/lib/*.sh $target/dev/lib/
-     cp $HARNESS_ROOT/dev/agent-feature-workflow.md $target/dev/
-     cp $HARNESS_ROOT/.claude/settings.json $target/.claude/
-  3. Adjust the Configuration block at the top of:
-       $target/.claude/agents/lead-orchestrator.md
+  echo "Bootstrapping agent-harness in $target..."
+  
+  # 1. Create directories
+  mkdir -p "$target/.agents/agents" "$target/.agents/rules" "$target/dev/lib" "$target/.github/workflows" "$target/.claude"
+  
+  # 2. Copy files
+  cp "$HARNESS_ROOT/.agents/agents/"*.md "$target/.agents/agents/"
+  cp "$HARNESS_ROOT/.agents/rules/"*.md "$target/.agents/rules/"
+  cp "$HARNESS_ROOT/.github/workflows/"*.yml "$target/.github/workflows/"
+  cp "$HARNESS_ROOT/dev/lib/"*.sh "$target/dev/lib/"
+  cp "$HARNESS_ROOT/dev/agent-feature-workflow.md" "$target/dev/"
+  cp "$HARNESS_ROOT/.claude/settings.json" "$target/.claude/"
+  cp "$HARNESS_ROOT/.antigravityignore" "$target/"
+  cp "$HARNESS_ROOT/CLAUDE.md" "$target/"
+  cp -a "$HARNESS_ROOT/.geminirules" "$target/" || true
+  cp -a "$HARNESS_ROOT/.cursorrules" "$target/" || true
+
+  cat <<EOF >&2
+
+Bootstrap complete!
+
+Next steps:
+  1. Adjust the Configuration block at the top of:
+       $target/.agents/agents/lead-orchestrator.md
        $target/.github/workflows/orchestrator.yml
      Replace each project-specific literal listed in the block.
-  4. Write the project authority files:
-       $target/.claude/rules/qc-structural-authority.md
-       $target/.claude/rules/qc-behavioral-authority.md
+  2. Write the project authority files:
+       $target/.agents/rules/qc-structural-authority.md
+       $target/.agents/rules/qc-behavioral-authority.md
      (See the source-project examples for the shape.)
-  5. Write any feat-* agents your project needs as
-     $target/.claude/agents/feat-<name>.md (mark harness: project).
-  6. Edit $target/dev/agent-feature-workflow.md for your toolchain
+  3. Write any feat-* agents your project needs as
+     $target/.agents/agents/feat-<name>.md (mark harness: project).
+  4. Edit $target/dev/agent-feature-workflow.md for your toolchain
      (the shipped version assumes OCaml + Dune + jj + Docker).
-  7. Run agent-harness check to verify the layer model.
+  5. Run agent-harness check to verify the layer model.
 EOF
-  exit 1
+  exit 0
 }
 
 cmd_sync() {
@@ -83,7 +94,7 @@ agent-harness sync: not yet implemented.
 Manual sync recipe (until automated):
   1. cd into the upstream agent-harness clone.
   2. git log --since=<last-sync-date> --diff-filter=AM --pretty=format:"%h %s" \
-       -- .claude/agents/ .claude/rules/ dev/lib/ .github/workflows/
+       -- .agents/agents/ .agents/rules/ dev/lib/ .github/workflows/
   3. For each commit affecting `harness: reusable` files, cherry-pick
      manually into your project: git format-patch <sha> -1 -o /tmp/
      then in your project: git am -3 /tmp/<patch>.

@@ -1,6 +1,6 @@
 ---
 name: lead-orchestrator
-description: Orchestrates daily parallel feature development for the <PROJECT_NAME>. Spawns feature and QC agents as subagents, coordinates integration order, and writes daily summaries for human review. Runs non-interactively via claude -p.
+description: Orchestrates daily parallel feature development for the <PROJECT_NAME>. Spawns feature and QC agents as subagents, coordinates integration order, and writes daily summaries for human review. Runs non-interactively via <AI_CLI_COMMAND>.
 model: opus
 harness: reusable
 ---
@@ -13,7 +13,7 @@ The orchestrator's whole job is to coordinate — it must be able to spawn subag
 
 Required: **Agent** (for dispatching `feat-*`, `harness-maintainer`, `health-scanner` (deep scan only -- fast scan is now deterministic Step 6), `qc-structural`, `qc-behavioral`, `ops-data`), plus Read, Write, Edit, Glob, Grep, Bash (for preflight `dune build && dune runtest`, jj state inspection, writing the daily summary).
 
-**Run model.** This agent is designed to run at the top level via `claude -p` so it has Agent access. If invoked as a nested subagent from another Claude Code session it may not have the Agent tool — in that case, bail out early and report the tool gap as an escalation rather than producing a planning-only summary.
+**Run model.** This agent is designed to run at the top level via `<AI_CLI_COMMAND>` so it has Agent access. If invoked as a nested subagent from another the AI agent session it may not have the Agent tool — in that case, bail out early and report the tool gap as an escalation rather than producing a planning-only summary.
 
 ## Plan Mode
 
@@ -533,7 +533,7 @@ patterns the orchestrator should dispatch on, not skip:
   research/scraping task. Dispatch ops-data to write a small probe,
   fetch a few days, validate the format. ops-data's scope explicitly
   includes writing new parsers + scrape research (see
-  `.claude/agents/ops-data.md` §"When to write code").
+  `.agents/agents/ops-data.md` §"When to write code").
 - **"execute a written plan"** (e.g. `dev/notes/sector-data-plan.md`).
   Dispatch ops-data to follow the plan — the plan IS the spec; no
   human decision needed.
@@ -561,7 +561,7 @@ You are the data operations agent for the <PROJECT_NAME>.
 ## Context
 <paste the relevant section from dev/notes/data-gaps.md>
 
-Read your full agent definition in .claude/agents/ops-data.md for scripts and workflow.
+Read your full agent definition in .agents/agents/ops-data.md for scripts and workflow.
 
 Docker container: <container-name>
 
@@ -627,7 +627,7 @@ Source report: dev/health/<source-file>
 - Branch: cleanup/<short-slug>
 - Flip the Backlog entry to `[~]` and push that edit before any code change
 
-Read your full agent definition in .claude/agents/code-health.md for scope, branch convention, and acceptance checklist.
+Read your full agent definition in .agents/agents/code-health.md for scope, branch convention, and acceptance checklist.
 
 When done, push the branch and return: branch name, tip commit, finding source, before/after linter delta on the touched files, any related findings logged into dev/status/cleanup.md §Backlog.
 ```
@@ -823,7 +823,7 @@ Dispatch shape depends on environment. Inspect `$TRADING_IN_CONTAINER` (set by t
 ### Local (TRADING_IN_CONTAINER unset)
 
 - Use **jj** for VCS. No git worktree, no `isolation:` parameter on the Agent tool.
-- Cap: **2 parallel subagents** per Agent message. Each subagent creates its own jj workspace: `jj workspace add .claude/jj-ws/agent-<short-id> && cd .claude/jj-ws/agent-<short-id>`. Working copy isolation is provided by jj itself (independent `@` per workspace); the underlying commit store is shared, so pushes land on the main jj repo.
+- Cap: **2 parallel subagents** per Agent message. Each subagent creates its own jj workspace: `jj workspace add .agents/jj-ws/agent-<short-id> && cd .agents/jj-ws/agent-<short-id>`. Working copy isolation is provided by jj itself (independent `@` per workspace); the underlying commit store is shared, so pushes land on the main jj repo.
 - Cleanup: each subagent prompt ends with `jj workspace forget <name>` (on success or failure — the prompt wraps it in a trap so a mid-flight kill still cleans up).
 
 ### GHA (TRADING_IN_CONTAINER=1)
@@ -883,9 +883,9 @@ Your branch: feat/<feature>
 
   # LOCAL path (TRADING_IN_CONTAINER unset) — isolated jj workspace:
   WS_NAME="agent-<your-short-id>"
-  jj workspace add ".claude/jj-ws/$WS_NAME"
+  jj workspace add ".agents/jj-ws/$WS_NAME"
   trap "cd /abs/repo/root && jj workspace forget \"$WS_NAME\" 2>/dev/null || true" EXIT
-  cd ".claude/jj-ws/$WS_NAME"
+  cd ".agents/jj-ws/$WS_NAME"
   jj git fetch
   jj new feat/<feature>@origin
   # If bookmark doesn't exist yet: jj bookmark create feat/<feature> -r @
@@ -1123,7 +1123,7 @@ Steps:
    - dune build
    - dune runtest
 3. Read diff: jj diff --from main@origin --to feat/<feature>@origin
-4. Fill in your structural checklist (see your agent definition in .claude/agents/qc-structural.md)
+4. Fill in your structural checklist (see your agent definition in .agents/agents/qc-structural.md)
 5. Capture the tip SHA of the branch being reviewed:
      REVIEWED_SHA=$(jj log -r 'feat/<feature>@origin' -T 'commit_id' --no-graph)
    Write this as the FIRST line of dev/reviews/<feature>.md:
@@ -1151,7 +1151,7 @@ Steps:
 1. Read docs/design/weinstein-book-reference.md (your primary authority)
 2. Read the relevant eng-design-<N>-*.md for this feature
 3. Read the implementation files from the feature branch
-4. Fill in your behavioral checklist (see your agent definition in .claude/agents/qc-behavioral.md)
+4. Fill in your behavioral checklist (see your agent definition in .agents/agents/qc-behavioral.md)
 
 The "Reviewed SHA:" line is already at the top of dev/reviews/<feature>.md (written
 by qc-structural). Do not overwrite it — append your section below the structural
@@ -1433,7 +1433,7 @@ fast scan has been retired because it produced recurring false-positive
 misread as a gating failure; run 3 2026-04-18: worktree contamination caused
 a ghost finding). Deterministic checks are cheaper, faster, and don't hallucinate.
 
-**The weekly deep scan (agentic) is unaffected -- see `.claude/agents/health-scanner.md`
+**The weekly deep scan (agentic) is unaffected -- see `.agents/agents/health-scanner.md`
 §"Deep scan". It runs via GHA cron (T3-A+ sub-item 1) and is NOT dispatched here.**
 
 ### Step 6.1: Build gate

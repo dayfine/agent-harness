@@ -36,7 +36,7 @@ The agent must read these at the start of every session, in order:
 7. **If the dispatch prompt mentions an "Approved plan" under the
    pre-flight context, read `dev/plans/<name>-<date>.md` first — its
    §Approach and §Out of scope are binding.** See
-   `.claude/agents/lead-orchestrator.md` §Step 3.5 for when plans
+   `.agents/agents/lead-orchestrator.md` §Step 3.5 for when plans
    are produced.
 8. **If the dispatch prompt contains a `## Rework mode` block, this is
    an intra-run rework dispatch — not a fresh session.** The branch
@@ -44,7 +44,7 @@ The agent must read these at the start of every session, in order:
    listed in the pasted `dev/reviews/<feature>.md` content. Follow the
    rework-mode rules exactly: address every checked-fail item, no new
    scope, use `fix(review): ` commit subjects, do not open a new PR or
-   flip the draft flag. See `.claude/agents/lead-orchestrator.md`
+   flip the draft flag. See `.agents/agents/lead-orchestrator.md`
    §Step 5a (rework decision) and §Step 4 "Rework Mode prompt" for the
    full contract.
 9. State the session plan before writing any code
@@ -68,7 +68,7 @@ Commit with `git commit`, push with `git push origin HEAD`.
 Otherwise (local runs), use **jj** with a per-session workspace. The
 orchestrator's dispatch prompt tells you the exact commands — follow
 those over any jj/git references in the examples in this file. See
-`.claude/agents/lead-orchestrator.md` §"Step 4: Spawn feature agents"
+`.agents/agents/lead-orchestrator.md` §"Step 4: Spawn feature agents"
 for the authoritative dispatch shape.
 ```
 
@@ -148,7 +148,7 @@ status to READY_FOR_REVIEW.
 - [ ] No function exceeds 50 lines
 - [ ] PR diff respects `## PR sizing` rules (≤500 LOC, one new module per PR; status / plan / fixtures don't count)
 - [ ] All configurable parameters routed through config record — no magic numbers
-- [ ] `dune build && dune runtest` passes with zero warnings **on a clean checkout of the branch** — not just on your local worktree. If you are running in `isolation: "worktree"` (the orchestrator default), your working copy is usually but not always a clean checkout — follow `.claude/rules/worktree-isolation.md` to verify (`jj diff --stat` pre-commit, branch ancestry check pre-push, PR file list post-push). If you are NOT in a worktree (rare, legacy runs), re-verify by checking that every module your branch references is either in your commits or already on `main@origin` — do not rely on files sitting in the shared working copy that you did not explicitly commit.
+- [ ] `dune build && dune runtest` passes with zero warnings **on a clean checkout of the branch** — not just on your local worktree. If you are running in `isolation: "worktree"` (the orchestrator default), your working copy is usually but not always a clean checkout — follow `.agents/rules/worktree-isolation.md` to verify (`jj diff --stat` pre-commit, branch ancestry check pre-push, PR file list post-push). If you are NOT in a worktree (rare, legacy runs), re-verify by checking that every module your branch references is either in your commits or already on `main@origin` — do not rely on files sitting in the shared working copy that you did not explicitly commit.
 - [ ] `dune build @fmt` passes (formatter in check mode; equivalent: `dune fmt` produces no diff)
 - [ ] `Interface stable: YES` is set in `dev/status/<feature>.md` once `.mli` is finalized
 - [ ] **PR description is non-empty.** `jst submit` does NOT populate the PR body from commit messages — the body field stays empty unless you write it explicitly. After `jst submit`, run `gh pr edit <N> --body-file <path>` (or `curl PATCH /pulls/<N> -d '{"body":"..."}'`) to set the body. The description should mirror the extended commit message: what changed, why, test plan. Bodies matter for reviewers scanning `gh pr list` and for future archaeology. Empty-body PRs were an observed gap — see run-5 on 2026-04-19.
@@ -228,7 +228,7 @@ Every feat-agent must respect the layer boundary:
 
 When adding a new feat-agent for a future feature:
 
-1. Copy this template as `.claude/agents/feat-<name>.md`
+1. Copy this template as `.agents/agents/feat-<name>.md`
 2. Fill in the feature-specific parts: design doc path, branch name, acceptance
    checklist items derived from the design doc
 3. Add a status file at `dev/status/<name>.md` using the standard format

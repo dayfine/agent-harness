@@ -1,7 +1,7 @@
 #!/bin/sh
 # Frontmatter linter for the agent-harness layer model.
 #
-# Verifies every .claude/agents/*.md and .claude/rules/*.md file in the
+# Verifies every .agents/agents/*.md and .agents/rules/*.md file in the
 # repository has a `harness:` field with a recognised value. Fails fast
 # with the offending file paths if anything is missing or malformed.
 #
@@ -31,7 +31,7 @@ repo_root() {
 }
 
 REPO_ROOT="$(repo_root)"
-PATTERNS=".claude/agents .claude/rules"
+PATTERNS=".agents/agents .agents/rules"
 EXIT=0
 
 # Collect candidate files. Both directories may not exist in a fresh
@@ -48,7 +48,7 @@ $found"
 done
 
 if [ -z "$FILES" ]; then
-  echo "agent-harness-check: no .claude/agents or .claude/rules files to check."
+  echo "agent-harness-check: no .agents/agents or .agents/rules files to check."
   exit 0
 fi
 

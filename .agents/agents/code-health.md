@@ -12,7 +12,7 @@ You are the code-health cleanup agent. Your job is to absorb small, low-risk mai
 1. Read the dispatch prompt — it names the specific finding you're addressing (file path + linter/check name + suggested fix shape).
 2. Read `dev/status/cleanup.md` — your rolling backlog; tick the item from `[ ]` to `[~]` early.
 3. Read the finding in `dev/health/<date>-{fast,deep}.md` to see the full context (counts, surrounding violations, severity).
-4. Read `CLAUDE.md` and `.claude/rules/test-patterns.md` for code patterns.
+4. Read `CLAUDE.md` and `.agents/rules/test-patterns.md` for code patterns.
 5. State your plan in 1–2 sentences before editing anything.
 
 ## Scope
@@ -30,7 +30,7 @@ You are the code-health cleanup agent. Your job is to absorb small, low-risk mai
 
 - **Behavior changes.** Any cleanup that alters trading logic, screener output, stop placement, or simulation results is out of scope — escalate to the relevant feat-agent via your status file. Cleanup PRs must be functional no-ops by the parity test (when one exists) and by `dune runtest` exit code.
 - **Linter rule changes** (`devtools/checks/linter_*.sh`, `dune` integration): that's `harness-maintainer`.
-- **Agent definitions** (`.claude/agents/*.md`): that's `harness-maintainer`.
+- **Agent definitions** (`.agents/agents/*.md`): that's `harness-maintainer`.
 - **Plan / status / decision docs:** read-only except for `dev/status/cleanup.md` (your own backlog).
 - **Multi-file refactors** that cross module boundaries: hand off to the relevant feat-agent.
 
@@ -56,7 +56,7 @@ Otherwise (local runs), use **jj** with a per-session workspace. The orchestrato
 
 ## Workspace integrity
 
-Before commit and before push, follow `.claude/rules/worktree-isolation.md` to verify your working copy and branch ancestry contain only files you intended.
+Before commit and before push, follow `.agents/rules/worktree-isolation.md` to verify your working copy and branch ancestry contain only files you intended.
 
 ## Allowed Tools
 

@@ -16,7 +16,7 @@ your project.
 ## What's in here
 
 ```
-.claude/
+.agents/
   agents/
     lead-orchestrator.md       — the daily driver; dispatches feat / QC / health agents
     harness-maintainer.md      — owns dev/ harness changes (status files, workflows, scripts)
@@ -39,7 +39,7 @@ dev/
 
 ## Three-layer model
 
-Every `.claude/agents/*.md` and `.claude/rules/*.md` carries a
+Every `.agents/agents/*.md` and `.agents/rules/*.md` carries a
 `harness:` frontmatter field. There are three values:
 
 | Layer        | Meaning                                                          | Lives in            |
@@ -50,10 +50,10 @@ Every `.claude/agents/*.md` and `.claude/rules/*.md` carries a
 
 The QC agents are split along the **methodology / authority seam**:
 
-- The `.md` under `.claude/agents/qc-{structural,behavioral}.md` describes
+- The `.md` under `.agents/agents/qc-{structural,behavioral}.md` describes
   the generic review protocol (when it runs, how it formats findings,
   how it pass/fails). It is `harness: reusable`.
-- The companion `.claude/rules/qc-{structural,behavioral}-authority.md`
+- The companion `.agents/rules/qc-{structural,behavioral}-authority.md`
   in the consuming project lists the project's specific lint names,
   architecture constraints, domain references, test framework, etc.
   Those files are `harness: project` and live only in your repo.
@@ -65,20 +65,20 @@ There is no published CLI yet (planned: `bin/agent-harness init` — see
 
 1. Clone this repo's contents into your new project's root.
 2. Delete the harness-only `LICENSE` and `README.md` if you want your
-   own; keep the `.claude/`, `.github/workflows/`, and `dev/` trees.
+   own; keep the `.agents/`, `.github/workflows/`, and `dev/` trees.
 3. Replace `<TODO>` placeholders in:
-   - `.claude/agents/feat-agent-template.md` — copy to
-     `.claude/agents/feat-<your-feature>.md` per active track and fill in.
-   - `.claude/agents/lead-orchestrator.md` Configuration block — set
+   - `.agents/agents/feat-agent-template.md` — copy to
+     `.agents/agents/feat-<your-feature>.md` per active track and fill in.
+   - `.agents/agents/lead-orchestrator.md` Configuration block — set
      repo URL, container image, track names, feat-agent names, branch
      conventions.
    - `.github/workflows/orchestrator.yml` — secret names, image refs,
      branch patterns, cron slots.
    - `dev/status/_index.md` — add one row per active track.
 4. Write your project-specific authority files for QC:
-   - `.claude/rules/qc-structural-authority.md` — your lints, build
+   - `.agents/rules/qc-structural-authority.md` — your lints, build
      gates, architecture constraints. `harness: project`.
-   - `.claude/rules/qc-behavioral-authority.md` — your domain
+   - `.agents/rules/qc-behavioral-authority.md` — your domain
      references, test conventions. `harness: project`.
 5. Write any `feat-<name>.md` agents your project needs (one per track).
    These are `harness: project`.
@@ -125,7 +125,7 @@ single source of truth.
 The harness ships **neither** by default. Add what your project needs:
 
 ```
-.claude/agents/intake-triage.md     # harness: project — your triage rules
+.agents/agents/intake-triage.md     # harness: project — your triage rules
 dev/intake/                         # optional dir for cached/processed Issue state
 ```
 
@@ -153,8 +153,8 @@ Not yet implemented; tracked in the source repo's plan
 - `bin/agent-harness sync --reusable-only` — diffs each
   `harness: reusable` file in the target against this upstream and
   presents per-file y/n/skip merges.
-- `bin/agent-harness check` — verifies every `.claude/agents/*.md` and
-  `.claude/rules/*.md` carries a `harness:` frontmatter line.
+- `bin/agent-harness check` — verifies every `.agents/agents/*.md` and
+  `.agents/rules/*.md` carries a `harness:` frontmatter line.
 
 ## Source
 
