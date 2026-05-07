@@ -9,11 +9,6 @@
 #   agent-harness help                       This message.
 #
 # Exit code: 0 on success, 1 on any error.
-#
-# Status: stub. `init` and `sync` are placeholders; only `check` and
-# `help` are functional. Implementation is being driven by real
-# bootstrap of the second consuming project — see the agent-harness
-# repo's open issues / follow-ups for current state.
 
 set -eu
 
@@ -64,7 +59,20 @@ cmd_init() {
   cp "$HARNESS_ROOT/dev/agent-feature-workflow-example.md" "$target/dev/"
   cp "$HARNESS_ROOT/.claude/settings.json" "$target/.claude/"
   cp "$HARNESS_ROOT/.antigravityignore" "$target/"
-  cp "$HARNESS_ROOT/CLAUDE.md" "$target/"
+
+  if [ -e "$target/.gitignore" ]; then
+    echo "WARN: $target/.gitignore exists; harness .gitignore saved as .gitignore.harness-template (merge entries manually)" >&2
+    cp "$HARNESS_ROOT/.gitignore" "$target/.gitignore.harness-template"
+  else
+    cp "$HARNESS_ROOT/.gitignore" "$target/.gitignore"
+  fi
+
+  if [ -e "$target/CLAUDE.md" ]; then
+    echo "WARN: $target/CLAUDE.md exists; harness CLAUDE.md saved as CLAUDE.md.harness-template (merge manually)" >&2
+    cp "$HARNESS_ROOT/CLAUDE.md" "$target/CLAUDE.md.harness-template"
+  else
+    cp "$HARNESS_ROOT/CLAUDE.md" "$target/"
+  fi
   cp -a "$HARNESS_ROOT/.geminirules" "$target/" || true
   cp -a "$HARNESS_ROOT/.cursorrules" "$target/" || true
 
