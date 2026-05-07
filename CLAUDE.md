@@ -39,6 +39,22 @@ references). The harness layer is loaded on top and provides the
 orchestration. The two CLAUDE.md files do not conflict — one is about
 the project, one is about the agentic harness.
 
+## Documentation system
+
+This harness ships a three-tier doc protocol. Full rules in
+`.agents/rules/documentation-system.md`; generation prompt and
+skeletons in `docs/conventions/`.
+
+When working in a directory:
+
+1. Read `CONTEXT.md` files from repo root down to the target directory.
+2. If `DEEP_DIVE.md` exists in the target, read it before reading
+   source.
+3. If `DEEP_DIVE.md` disagrees with source, trust source and flag
+   drift.
+4. Never edit `DEEP_DIVE.md` directly — it is regenerated.
+5. Edit `CONTEXT.md` to shape future regenerations.
+
 ## Source
 
 Extracted from a production system on 2026-04-26 per
