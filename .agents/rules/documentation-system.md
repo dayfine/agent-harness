@@ -31,6 +31,8 @@ glossary. Those belong in `CONTEXT.md` / `DEEP_DIVE.md` / `docs/cross_cutting/`.
 **Stays lean.** Read on every interaction; competes with the task for
 attention.
 
+Skeleton: `docs/conventions/CLAUDE.template.md`.
+
 **Doc protocol section (required in `CLAUDE.md`):**
 
 ```
