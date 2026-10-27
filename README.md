@@ -26,12 +26,15 @@ your project.
     feat-agent-template.md     — skeleton each project copies into its own feat-<name>.md
   rules/
     worktree-isolation.md      — invariants for isolation:worktree dispatches
+.claude/skills/
+  pr-tree/SKILL.md             — "print the PR tree and queue"; runs dev/lib/pr-tree.sh
 .github/workflows/
   orchestrator.yml             — daily orchestrator dispatch via claude-code-action
   health-deep-weekly.yml       — weekly deep health-scanner dispatch
 dev/
   agent-feature-workflow.md    — shared workflow doc every feat-agent reads at session start
   lib/run-in-env.sh            — shell wrapper that execs commands inside the devcontainer
+  lib/pr-tree.sh               — stacked-PR tree + review/send queue (config: dev/pr-tree.json)
   plans/README.md              — conventions for `dev/plans/<feature>-<YYYY-MM-DD>.md` files
   status/_index.md             — skeleton index of tracked work
 ```
