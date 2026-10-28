@@ -1,0 +1,22 @@
+# harness: template
+# Codex command policy for a consuming project. Copy to .codex/rules/<project>.rules
+# (Codex loads .codex/rules/*.rules at startup in a trusted project), then add
+# project lines (e.g. your container exec prefix, your status script).
+# An allow rule runs the command outside the sandbox; task authorization and
+# worktree isolation still apply.
+prefix_rule(pattern=["gh", "pr", "merge"], decision="forbidden", justification="Leave merging to the dispatcher or a human.", match=["gh pr merge 12 --admin"])
+# Flags can appear anywhere; never auto-allow a review (an --approve would read as a gate).
+prefix_rule(pattern=["gh", "pr", "review"], decision="prompt", match=["gh pr review 12 --approve", "gh pr review --comment 12"])
+prefix_rule(pattern=["gh", "api"], decision="prompt", justification="Check the HTTP method and endpoint before granting access.")
+prefix_rule(pattern=["gh", "pr", ["view", "diff", "checks", "list", "create"]], decision="allow", match=["gh pr view 12"], not_match=["gh pr merge 12", "gh pr review 12 --approve"])
+prefix_rule(pattern=["gh", "issue", ["view", "list", "create", "comment", "edit"]], decision="allow", match=["gh issue view 12"], not_match=["gh issue delete 12", "gh issue transfer 12 other/repo"])
+prefix_rule(pattern=["gh", "auth", "status"], decision="allow")
+prefix_rule(pattern=["gh", "run", ["view", "list"]], decision="allow")
+prefix_rule(pattern=["git", ["status", "diff", "log", "show", "rev-parse", "ls-files", "fetch", "switch", "add", "commit"]], decision="allow")
+prefix_rule(pattern=["git", "worktree", ["add", "list"]], decision="allow")
+prefix_rule(pattern=["git", "worktree", "remove"], decision="prompt")
+prefix_rule(pattern=["rm"], decision="prompt")
+prefix_rule(pattern=[["ls", "cat", "head", "tail", "wc", "rg", "grep", "diff", "file", "stat", "pwd", "date", "df", "du", "echo", "true"]], decision="allow")
+# Raw push prompts (this wins over a saved personal allow); the helper pushes only codex/* branches.
+prefix_rule(pattern=["git", "push"], decision="prompt", match=["git push origin main", "git push -u origin codex/x-y"], not_match=["sh dev/lib/codex-push.sh"])
+prefix_rule(pattern=["sh", "dev/lib/codex-push.sh"], decision="allow", match=["sh dev/lib/codex-push.sh"], not_match=["git push origin main", "sh /tmp/codex-push.sh"])
