@@ -28,6 +28,7 @@ your project.
     worktree-isolation.md      — invariants for isolation:worktree dispatches
 .claude/skills/
   pr-tree/SKILL.md             — "print the PR tree and queue"; runs dev/lib/pr-tree.sh
+  codex-dispatch/SKILL.md      — hand tasks to Codex, advisory Codex PR reviews, quota pacing
 .github/workflows/
   orchestrator.yml             — daily orchestrator dispatch via claude-code-action
   health-deep-weekly.yml       — weekly deep health-scanner dispatch
@@ -35,6 +36,9 @@ dev/
   agent-feature-workflow.md    — shared workflow doc every feat-agent reads at session start
   lib/run-in-env.sh            — shell wrapper that execs commands inside the devcontainer
   lib/pr-tree.sh               — stacked-PR tree + review/send queue (config: dev/pr-tree.json)
+  lib/codex-review.sh          — advisory Codex review of one PR, validated then posted (config: dev/codex-review.env)
+  lib/codex-quota.sh           — Codex 5-hour / weekly usage, with --guard exits for pacing
+  lib/codex-push.sh            — the only push Codex runs: current codex/* branch to origin
   plans/README.md              — conventions for `dev/plans/<feature>-<YYYY-MM-DD>.md` files
   status/_index.md             — skeleton index of tracked work
 ```
