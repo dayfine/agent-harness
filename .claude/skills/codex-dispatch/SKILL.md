@@ -11,6 +11,11 @@ things: **bounded tasks** (it opens a PR) and **advisory reviews** (it reads a
 PR and the script posts its report). In both, your project's own gates decide
 the merge. Codex never merges, approves or stands in for a gate.
 
+The scripts below live in `dev/lib/` of a repo that synced the harness. In a
+repo that has not, run them from the harness checkout instead
+(`sh ${AGENT_HARNESS:-~/Projects/agent-harness}/dev/lib/codex-review.sh <PR>`): they
+resolve the repo from the current directory, not from where they live.
+
 ## Before any hand-off: check the quota
 
 ```sh
