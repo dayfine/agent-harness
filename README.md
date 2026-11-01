@@ -28,6 +28,7 @@ your project.
     worktree-isolation.md      — invariants for isolation:worktree dispatches
     agent-liveness.md          — five ways dispatched agents stall, and the rule for each
     standing-rules.md          — the block every dispatched agent definition carries
+    long-chain-ownership.md    — scripts wait, agents decide: runner, handoff, CI waits, budgets
   standing-rules.conf          — which agents must carry which standing-rules roles
 .claude/skills/
   pr-tree/SKILL.md             — "print the PR tree and queue"; runs dev/lib/pr-tree.sh
@@ -40,6 +41,8 @@ bin/
   health-deep-weekly.yml       — weekly deep health-scanner dispatch
 dev/
   agent-feature-workflow.md    — shared workflow doc every feat-agent reads at session start
+  lib/chain-runner.sh          — resumable step runner; exits on done / decision / failed, writes handoff.md
+  lib/wait-pr-checks.sh        — bounded wait for a PR's checks; 0 green, 10 failed, 1 timeout
   lib/run-in-env.sh            — shell wrapper that execs commands inside the devcontainer
   lib/pr-tree.sh               — stacked-PR tree + review/send queue (config: dev/pr-tree.json)
   lib/codex-review.sh          — advisory Codex review of one PR, validated then posted (config: dev/codex-review.env)

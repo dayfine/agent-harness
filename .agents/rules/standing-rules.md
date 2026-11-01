@@ -49,9 +49,11 @@ Append to the `all` block:
   build and test run comes after the push. Then, in the foreground and without ending the turn:
   verify → commit → push → open the PR → confirm the PR's file list. Never end with an unpushed commit.
   If the push or PR step fails twice, report the branch, the commit id and "PR NOT opened".
+- **Your stage ends at the PR.** Never wait for CI or any other event after pushing: report the PR
+  number and tip SHA and stop; the dispatcher waits for CI (`.agents/rules/long-chain-ownership.md`).
 ```
 
-Required phrase: `Never end with an unpushed commit.`
+Required phrases: `Never end with an unpushed commit.`, `the dispatcher waits for CI`.
 
 ## Role `review` — agents that post a verdict (qc-*)
 

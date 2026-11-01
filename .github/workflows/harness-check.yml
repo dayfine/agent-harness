@@ -8,6 +8,10 @@ on:
       - 'bin/agent-harness-check.sh'
       - 'bin/agent-standing-rules-check.sh'
       - 'bin/test-agent-standing-rules-check.sh'
+      - 'dev/lib/chain-runner.sh'
+      - 'dev/lib/wait-pr-checks.sh'
+      - 'bin/test-chain-runner.sh'
+      - 'bin/test-wait-pr-checks.sh'
 
 jobs:
   check-harness:
@@ -21,3 +25,9 @@ jobs:
       - name: Test agent-standing-rules-check.sh
         if: hashFiles('bin/test-agent-standing-rules-check.sh') != ''
         run: sh bin/test-agent-standing-rules-check.sh
+      - name: Test chain-runner.sh
+        if: hashFiles('bin/test-chain-runner.sh') != ''
+        run: sh bin/test-chain-runner.sh
+      - name: Test wait-pr-checks.sh
+        if: hashFiles('bin/test-wait-pr-checks.sh') != ''
+        run: sh bin/test-wait-pr-checks.sh

@@ -41,7 +41,10 @@ check_role() { # file, agent, role
       need "$1" "$2" "Never background a long command and end the turn"
       need "$1" "$2" "Every wait loop has an iteration cap"
       ;;
-    build) need "$1" "$2" "Never end with an unpushed commit." ;;
+    build)
+      need "$1" "$2" "Never end with an unpushed commit."
+      need "$1" "$2" "the dispatcher waits for CI"
+      ;;
     review) need "$1" "$2" "Post first, then verify" ;;
     *)
       echo "agent-standing-rules-check: $CONF: unknown role '$3' for $2" >&2
