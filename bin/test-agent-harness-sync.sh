@@ -170,6 +170,53 @@ expected2=$(cat "$upstream_file")
 assert_eq "merged: no local frontmatter uses upstream verbatim" "$expected2" "$result2"
 
 # -----------------------------------------------------------------------
+echo "=== has_harness_tag / sync_candidates ==="
+# -----------------------------------------------------------------------
+
+up="$TMPDIR_TEST/up"
+mkdir -p "$up/.agents/rules" "$up/bin" "$up/dev/lib"
+printf -- '---\nharness: template\n---\nbody\n' > "$up/.agents/rules/tpl.md"
+printf -- '---\nharness: reusable\n---\nbody\n' > "$up/.agents/rules/reuse.md"
+printf -- '---\nharness: reusable-ish\n---\nbody\n' > "$up/.agents/rules/odd.md"
+printf '# harness: template\na b\n' > "$up/.agents/standing.conf"
+printf '#!/bin/sh\n# harness: reusable\n' > "$up/bin/tool"
+printf '#!/bin/sh\n# harness: reusable\n' > "$up/bin/check.sh"
+printf '#!/bin/sh\n# harness: reusable\n' > "$up/bin/test-check.sh"
+printf 'no shebang\n# harness: reusable\n' > "$up/bin/notes"
+printf '# harness: reusable\n' > "$up/dev/lib/x.txt"
+
+assert_true  "conf with # harness: template"     has_harness_tag "$up/.agents/standing.conf" template
+assert_true  "extensionless script with tag"     has_harness_tag "$up/bin/tool" reusable
+assert_false "extensionless file without #!"     has_harness_tag "$up/bin/notes" reusable
+assert_false "unknown extension"                 has_harness_tag "$up/dev/lib/x.txt" reusable
+assert_false "reusable-ish is not reusable"      has_harness_tag "$up/.agents/rules/odd.md" reusable
+
+assert_eq "sync_candidates: layers, bin, conf; skips tests and untagged" \
+"template .agents/standing.conf
+reusable .agents/rules/reuse.md
+template .agents/rules/tpl.md
+reusable bin/check.sh
+reusable bin/tool" "$(sync_candidates "$up")"
+
+# -----------------------------------------------------------------------
+echo "=== sync end to end (local upstream, scripted answers) ==="
+# -----------------------------------------------------------------------
+
+consumer="$TMPDIR_TEST/consumer"
+mkdir -p "$consumer/.agents/rules"
+printf -- '---\nharness: template\n---\nfilled in locally\n' > "$consumer/.agents/rules/tpl.md"
+set +e
+(cd "$consumer" && yes y | AGENT_HARNESS_SYNC_SOURCED=0 AGENT_HARNESS_UPSTREAM="$up" sh "$SCRIPT_DIR/agent-harness-sync.sh" > "$TMPDIR_TEST/sync.out" 2>&1)
+sync_rc=$?
+set -e
+assert_eq    "sync exits 0 with a local upstream"   "0" "$sync_rc"
+assert_true  "missing template conf is copied"     test -f "$consumer/.agents/standing.conf"
+assert_true  "missing bin script is copied"        test -f "$consumer/bin/check.sh"
+assert_true  "copied script stays executable"      test -x "$consumer/bin/tool" -o ! -x "$up/bin/tool"
+assert_false "harness tests are not copied"        test -f "$consumer/bin/test-check.sh"
+assert_eq    "existing template is not overwritten" "filled in locally" "$(tail -1 "$consumer/.agents/rules/tpl.md")"
+
+# -----------------------------------------------------------------------
 echo ""
 echo "Results: $PASS passed, $FAIL failed."
 [ "$FAIL" -eq 0 ] && exit 0 || exit 1

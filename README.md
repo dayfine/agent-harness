@@ -159,7 +159,10 @@ agent-harness sync
 The tool clones the upstream repo at the pinned `AGENT_HARNESS_TAG`
 (defaults to `main`), diffs each reusable file, and presents a
 per-file `[y/N/skip]` prompt. Local frontmatter is always preserved;
-only the body content is updated.
+only the body content is updated. It covers `.agents/`, `.agents/agents/`,
+`.agents/rules/`, `.github/workflows/`, `dev/lib/` and `bin/` (the harness's own
+`bin/test-*` excepted). `harness: template` files are offered only when
+missing locally, never overwritten, since you fill them in.
 
 ```bash
 # Pin to a specific release
@@ -176,7 +179,7 @@ All three subcommands are implemented and available in `v0.1.0`:
 | Command | Description |
 |---|---|
 | `agent-harness init <target-dir>` | Bootstrap a new project from this template |
-| `agent-harness sync` | Interactively pull `harness: reusable` updates from upstream |
+| `agent-harness sync` | Interactively pull `harness: reusable` updates and missing templates from upstream |
 | `agent-harness check` | Verify every agent/rule/workflow/script carries a `harness:` tag |
 
 ## Source

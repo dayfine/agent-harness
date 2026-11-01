@@ -1,6 +1,10 @@
 #!/bin/sh
 # agent-harness-sync — selectively sync harness: reusable files from upstream.
 #
+# Looks in .agents/, .agents/agents/, .agents/rules/, .github/workflows/, dev/lib/
+# and bin/ (not bin/test-*). Reusable files are offered as updates; template
+# files only when missing locally, never overwritten.
+#
 # Usage: agent-harness sync
 #
 # Environment variables:
@@ -34,23 +38,53 @@ get_body() {
   awk 'BEGIN{c=0} /^---$/{c++; next} c>=2{print}' "$1"
 }
 
-# has_reusable_tag <file>
-# Returns 0 if the file is tagged harness: reusable.
-has_reusable_tag() {
-  f="$1"
-  case "$f" in
+# has_harness_tag <file> <value>
+# Returns 0 if the file is tagged `harness: <value>`: in the YAML frontmatter
+# for .md, as a `# harness:` comment in the first 20 lines for .sh/.yml/.conf
+# and for extensionless scripts (a #! first line).
+has_harness_tag() {
+  f="$1"; v="$2"
+  case "${f##*/}" in
     *.md)
       # Must be inside the YAML frontmatter block
-      awk 'BEGIN{c=0;found=0} /^---$/{c++; if(c==2)exit; next} c==1 && /^harness:[[:space:]]*reusable/{found=1} END{exit (found ? 0 : 1)}' "$f"
+      awk -v v="$v" 'BEGIN{c=0;found=0} /^---$/{c++; if(c==2)exit; next} c==1 && $0 ~ ("^harness:[[:space:]]*" v "([[:space:]]|$)"){found=1} END{exit (found ? 0 : 1)}' "$f"
       ;;
-    *.sh|*.yml)
-      # Must appear in the first 20 lines as a comment
-      head -20 "$f" | grep -q '#[[:space:]]*harness:[[:space:]]*reusable'
+    *.sh|*.yml|*.conf)
+      head -20 "$f" | grep -qE "#[[:space:]]*harness:[[:space:]]*$v([[:space:]]|\$)"
       ;;
-    *)
+    *.*)
       return 1
       ;;
+    *)
+      head -1 "$f" | grep -q '^#!' || return 1
+      head -20 "$f" | grep -qE "#[[:space:]]*harness:[[:space:]]*$v([[:space:]]|\$)"
+      ;;
   esac
+}
+
+# has_reusable_tag <file>
+# Returns 0 if the file is tagged harness: reusable.
+has_reusable_tag() { has_harness_tag "$1" reusable; }
+
+# sync_candidates <upstream_dir>
+# Prints `<layer> <relative path>` for each upstream file sync considers,
+# sorted: `reusable` files are offered as updates; `template` files are only
+# offered when missing locally (the consumer fills templates in, so sync never
+# overwrites one). bin/test-*.sh are the harness's own tests and are skipped.
+sync_candidates() {
+  up="$1"
+  for d in ".agents" ".agents/agents" ".agents/rules" ".github/workflows" "dev/lib" "bin"; do
+    [ -d "$up/$d" ] || continue
+    find "$up/$d" -maxdepth 1 -type f 2>/dev/null | sort | while read -r file; do
+      rel=${file#"$up"/}
+      case "$rel" in bin/test-*) continue ;; esac
+      if has_harness_tag "$file" reusable; then
+        echo "reusable $rel"
+      elif has_harness_tag "$file" template; then
+        echo "template $rel"
+      fi
+    done
+  done
 }
 
 # build_merged <local_file> <upstream_file> <output_file>
@@ -80,6 +114,25 @@ build_merged() {
 # ---------------------------------------------------------------------------
 # Main — only runs when this script is executed directly, not when sourced
 # ---------------------------------------------------------------------------
+# offer_new <rel> <upstream_file> <note>
+# Asks whether to copy a file that exists upstream but not locally.
+offer_new() {
+  printf '\nNew upstream file: %s%s\nCopy it to local? [y/N] ' "$1" "$3"
+  read -r choice
+  case "$choice" in
+    y|Y|yes|YES)
+      mkdir -p "$(dirname "$1")"
+      cp "$2" "$1"
+      echo "Copied $1."
+      SYNCED=$((SYNCED + 1))
+      ;;
+    *)
+      echo "Skipped $1."
+      SKIPPED=$((SKIPPED + 1))
+      ;;
+  esac
+}
+
 main() {
   TAG="${AGENT_HARNESS_TAG:-main}"
   URL="${AGENT_HARNESS_URL:-https://github.com/dayfine/agent-harness.git}"
@@ -90,7 +143,7 @@ main() {
 
   # Temp dir used for clone; cleaned up on exit
   CLONE_DIR=""
-  cleanup() { [ -n "$CLONE_DIR" ] && rm -rf "$CLONE_DIR"; }
+  cleanup() { if [ -n "$CLONE_DIR" ]; then rm -rf "$CLONE_DIR"; fi; }
   trap cleanup EXIT INT TERM
 
   # --- Resolve upstream directory ---
@@ -104,23 +157,13 @@ main() {
     UPSTREAM_DIR="$CLONE_DIR/upstream"
   fi
 
-  # --- Collect reusable files (sorted for deterministic prompts) ---
-  REUSABLE_FILES=""
-  for d in ".agents/agents" ".agents/rules" ".github/workflows" "dev/lib"; do
-    full_dir="$UPSTREAM_DIR/$d"
-    [ -d "$full_dir" ] || continue
-    found=$(find "$full_dir" -maxdepth 1 -type f \
-              \( -name "*.md" -o -name "*.sh" -o -name "*.yml" \) 2>/dev/null | sort) || true
-    for f in $found; do
-      if has_reusable_tag "$f"; then
-        rel=$(printf '%s' "$f" | sed "s|^$UPSTREAM_DIR/||")
-        REUSABLE_FILES="$REUSABLE_FILES $rel"
-      fi
-    done
-  done
+  # --- Collect candidates (sorted for deterministic prompts) ---
+  CANDIDATES=$(sync_candidates "$UPSTREAM_DIR")
+  REUSABLE_FILES=$(printf '%s\n' "$CANDIDATES" | awk '$1=="reusable"{print $2}')
+  TEMPLATE_FILES=$(printf '%s\n' "$CANDIDATES" | awk '$1=="template"{print $2}')
 
-  if [ -z "$(printf '%s' "$REUSABLE_FILES" | tr -d ' ')" ]; then
-    echo "No reusable files found upstream."
+  if [ -z "$CANDIDATES" ]; then
+    echo "No reusable or template files found upstream."
     return
   fi
 
@@ -128,26 +171,18 @@ main() {
   WORK_DIR="$(mktemp -d)"
   trap 'rm -rf "$WORK_DIR"; cleanup' EXIT INT TERM
 
-  # --- Process each file ---
+  # --- Templates: offered only when missing locally; never overwritten ---
+  for rel in $TEMPLATE_FILES; do
+    [ -f "$rel" ] || offer_new "$rel" "$UPSTREAM_DIR/$rel" " (template: fill in its placeholders)"
+  done
+
+  # --- Process each reusable file ---
   for rel in $REUSABLE_FILES; do
     upstream_file="$UPSTREAM_DIR/$rel"
 
     # New file — doesn't exist locally
     if [ ! -f "$rel" ]; then
-      printf '\nNew upstream file: %s\nCopy it to local? [y/N] ' "$rel"
-      read -r choice
-      case "$choice" in
-        y|Y|yes|YES)
-          mkdir -p "$(dirname "$rel")"
-          cp "$upstream_file" "$rel"
-          echo "Copied $rel."
-          SYNCED=$((SYNCED + 1))
-          ;;
-        *)
-          echo "Skipped $rel."
-          SKIPPED=$((SKIPPED + 1))
-          ;;
-      esac
+      offer_new "$rel" "$upstream_file" ""
       continue
     fi
 
