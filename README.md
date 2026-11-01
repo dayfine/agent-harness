@@ -26,9 +26,15 @@ your project.
     feat-agent-template.md     — skeleton each project copies into its own feat-<name>.md
   rules/
     worktree-isolation.md      — invariants for isolation:worktree dispatches
+    agent-liveness.md          — five ways dispatched agents stall, and the rule for each
+    standing-rules.md          — the block every dispatched agent definition carries
+  standing-rules.conf          — which agents must carry which standing-rules roles
 .claude/skills/
   pr-tree/SKILL.md             — "print the PR tree and queue"; runs dev/lib/pr-tree.sh
   codex-dispatch/SKILL.md      — hand tasks to Codex, advisory Codex PR reviews, quota pacing
+bin/
+  agent-harness-check.sh       — every harness file carries a harness: layer tag
+  agent-standing-rules-check.sh — every listed agent definition carries its standing rules
 .github/workflows/
   orchestrator.yml             — daily orchestrator dispatch via claude-code-action
   health-deep-weekly.yml       — weekly deep health-scanner dispatch
