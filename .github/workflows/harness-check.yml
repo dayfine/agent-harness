@@ -12,6 +12,8 @@ on:
       - 'dev/lib/wait-pr-checks.sh'
       - 'bin/test-chain-runner.sh'
       - 'bin/test-wait-pr-checks.sh'
+      - 'bin/agent-harness-sync.sh'
+      - 'bin/test-agent-harness-sync.sh'
 
 jobs:
   check-harness:
@@ -31,3 +33,6 @@ jobs:
       - name: Test wait-pr-checks.sh
         if: hashFiles('bin/test-wait-pr-checks.sh') != ''
         run: sh bin/test-wait-pr-checks.sh
+      - name: Test agent-harness-sync.sh
+        if: hashFiles('bin/test-agent-harness-sync.sh') != ''
+        run: sh bin/test-agent-harness-sync.sh
