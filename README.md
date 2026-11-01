@@ -52,6 +52,57 @@ dev/
   status/_index.md             — skeleton index of tracked work
 ```
 
+## Handing this to an agent
+
+Paste the brief below to an agent working in the repo that should adopt the
+harness. It is written to that agent.
+
+> **Adopt agent-harness's agent-liveness and long-chain patterns in this repo.**
+>
+> Clone https://github.com/dayfine/agent-harness next to this repo
+> (`git clone https://github.com/dayfine/agent-harness ../agent-harness`), then read, in order:
+> `.agents/rules/agent-liveness.md` (five ways dispatched agents stall, the rule for each),
+> `.agents/rules/long-chain-ownership.md` (scripts wait, agents decide), and
+> `.agents/rules/standing-rules.md` (the block every dispatched agent definition carries).
+>
+> **The pattern.** Subagents never wait on anything outside their own turn, because nothing
+> wakes a subagent once its turn ends. A stage agent commits, pushes, opens the PR, reports the
+> PR number and tip SHA, and stops. Scripts own all waiting and sequencing:
+> `dev/lib/chain-runner.sh` runs a resumable chain of steps (exit 0 done, 10 a step needs a
+> decision, 1 a step failed; writes `handoff.md` each time) and `dev/lib/wait-pr-checks.sh`
+> waits on CI with a cap on polls (0 passed, 10 a check failed, 1 at the cap). The dispatcher
+> runs these as harness-tracked background tasks, reads only `handoff.md` when one exits, and
+> starts a fresh agent with a short brief for each stage that needs a decision. Every wake
+> re-reads the whole context, so one agent watching an hours-long chain mostly pays to re-read
+> itself.
+>
+> **Install.** No harness yet: `sh ../agent-harness/bin/agent-harness init .`
+> Existing harness: list first, copying nothing:
+> `yes n | AGENT_HARNESS_UPSTREAM=../agent-harness sh ../agent-harness/bin/agent-harness sync`,
+> then re-run without `yes n |` and answer per file. Sync offers updates to `harness: reusable`
+> files and offers `harness: template` files only when missing. It keeps local frontmatter but
+> replaces a reusable file's body: read each diff first if this repo edited those files.
+>
+> **Then:**
+> 1. For each agent this repo dispatches, paste the standing-rules block for its role from
+>    `standing-rules.md` into its definition. Fill in the `<TODO>` build, test and checkout
+>    commands; keep the checked phrases word for word.
+> 2. List those agents and roles in `.agents/standing-rules.conf` (`<agent> all build`, or
+>    `<agent> all review` for a reviewer).
+> 3. `sh bin/agent-standing-rules-check.sh` and `sh bin/agent-harness-check.sh` must pass; keep
+>    both in CI (`.github/workflows/harness-check.yml` runs them).
+> 4. Cut from dispatch briefs anything the standing rules now cover. A brief carries only the
+>    task: issue or PR, tip SHA, scope, prior review, rework iteration (about 0.5 KB).
+> 5. Move one real multi-step chain to `chain-runner.sh`, with `wait-pr-checks.sh` as its CI
+>    step. Record tokens per completed step before and after.
+>
+> **While doing this:** don't wait for your PR's CI; report the PR and stop. Every wait loop
+> you write has an iteration cap. Keep secrets and licensed data out of step output
+> (`handoff.md` quotes the end of the stopping step's log; `CHAIN_TAIL_LINES=0` turns that
+> off). One PR for the install and standing rules, a separate PR for the first chain
+> migration. If something here doesn't fit this repo, open an issue on dayfine/agent-harness
+> rather than changing your copy in place.
+
 ## Three-layer model
 
 Every `.agents/agents/*.md` and `.agents/rules/*.md` carries a
