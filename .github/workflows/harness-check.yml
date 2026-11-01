@@ -4,8 +4,10 @@ name: Harness Check
 on:
   pull_request:
     paths:
-      - '.agents/agents/**'
-      - '.agents/rules/**'
+      - '.agents/**'
+      - 'bin/agent-harness-check.sh'
+      - 'bin/agent-standing-rules-check.sh'
+      - 'bin/test-agent-standing-rules-check.sh'
 
 jobs:
   check-harness:
@@ -14,3 +16,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run agent-harness-check.sh
         run: sh bin/agent-harness-check.sh
+      - name: Run agent-standing-rules-check.sh
+        run: sh bin/agent-standing-rules-check.sh
+      - name: Test agent-standing-rules-check.sh
+        if: hashFiles('bin/test-agent-standing-rules-check.sh') != ''
+        run: sh bin/test-agent-standing-rules-check.sh

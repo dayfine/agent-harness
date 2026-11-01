@@ -55,6 +55,8 @@ cmd_init() {
   cp "$HARNESS_ROOT/.github/workflows/"*.yml "$target/.github/workflows/"
   cp "$HARNESS_ROOT/dev/lib/"*.sh "$target/dev/lib/"
   cp "$HARNESS_ROOT/bin/agent-harness-check.sh" "$target/bin/"
+  cp "$HARNESS_ROOT/bin/agent-standing-rules-check.sh" "$target/bin/"
+  cp "$HARNESS_ROOT/.agents/standing-rules.conf" "$target/.agents/"
   cp "$HARNESS_ROOT/dev/agent-feature-workflow.md" "$target/dev/"
   cp "$HARNESS_ROOT/dev/agent-feature-workflow-example.md" "$target/dev/"
   cp "$HARNESS_ROOT/.claude/settings.json" "$target/.claude/"
