@@ -141,6 +141,7 @@ _handoff() { # status, step id or "", note
 # for a stop, or 0 to continue.
 _run_step() { # id, command
   max=${CHAIN_MAX_ATTEMPTS:-2}
+  rc=none
   while [ "$(_attempts "$1")" -lt "$max" ]; do
     rc=$(_attempt "$1" "$2")
     echo $(($(_attempts "$1") + 1)) > "$STATE/attempts/$1"
@@ -153,7 +154,7 @@ _run_step() { # id, command
       return "$DECISION_RC"
     fi
   done
-  _handoff failed "$1" "failed $max attempts; last exit $rc"
+  _handoff failed "$1" "failed $(_attempts "$1") of $max attempts; last exit this run: $rc (reset the step to retry)"
   return 1
 }
 

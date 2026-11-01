@@ -53,7 +53,7 @@ check "handoff names the step" 'grep -q "step: b (attempts: 1)" "$d/st/handoff.m
 check "later steps did not run" '! grep -q c "$d/trace"'
 touch "$d/fixed"
 RUN_ENV="CHAIN_MAX_ATTEMPTS=1"; run "$d" run chain.txt st
-check "attempts persist: still failed before reset" '[ "$RC" -eq 1 ]'
+check "attempts persist: still failed before reset" '[ "$RC" -eq 1 ] && grep -q "last exit this run: none" "$d/st/handoff.md"'
 run "$d" reset st b
 RUN_ENV="CHAIN_MAX_ATTEMPTS=1"; run "$d" run chain.txt st
 check "after reset the chain finishes" '[ "$RC" -eq 0 ]'
@@ -72,7 +72,7 @@ check "decision is not retried" '[ "$(cat "$d/st/attempts/b")" = 1 ]'
 
 d=$(new slow "a sleep 3 && touch late")
 RUN_ENV="CHAIN_STEP_TIMEOUT=1 CHAIN_MAX_ATTEMPTS=1"; run "$d" run chain.txt st
-check "timeout: step fails" '[ "$RC" -eq 1 ] && grep -q "last exit 124" "$d/st/handoff.md"'
+check "timeout: step fails" '[ "$RC" -eq 1 ] && grep -q "last exit this run: 124" "$d/st/handoff.md"'
 sleep 3
 check "timeout kills the whole step, not only its shell" '[ ! -f "$d/late" ]'
 
