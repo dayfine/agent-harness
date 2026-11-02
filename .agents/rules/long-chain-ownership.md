@@ -114,6 +114,23 @@ A chain needs caps that do not depend on the model noticing:
 When a cap is hit, the runner writes `handoff.md` and exits. It never
 continues on hope.
 
+## Inline or delegate
+
+Not every PR needs a subagent. Pick by what the work costs the main session.
+
+| delegate to a fresh agent | do it in the main session |
+|---|---|
+| review gates (the author never posts its own verdict) | a small change whose context is already loaded: docs, a script fix, a status file |
+| code that needs a build/test loop, a worktree or a container slot | finishing a stalled agent's commit: verify, push, open the PR |
+| work that reads many files or runs longer than about 30 minutes | merges, labels, issue triage |
+| each stage of a long chain, with the handoff as its brief | |
+
+Rule of thumb: delegate when the work would add roughly 30–50k tokens to the
+main context, or when the main session must stay lean because it wakes often
+(a chain wait, a dispatcher loop). Otherwise do it inline. A subagent pays the
+fixed floor plus a brief plus whatever it has to rediscover. Inline work grows
+the context, and every later wake pays to re-read it, so compact after it.
+
 ## Model by step, not by chain
 
 The chain's mechanical parts are not model work at all (they are script
@@ -147,3 +164,4 @@ may still be cheaper.
 - **C2.** Every wait in a chain is a bounded script step or a tracked
   background task, never a model poll on a timer.
 - **C3.** A chain's state directory and handoff live outside the checkout.
+- **C4.** No session posts a review-gate verdict on a PR it wrote.
