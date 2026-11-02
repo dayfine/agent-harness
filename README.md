@@ -223,6 +223,30 @@ AGENT_HARNESS_TAG=v0.1.0 agent-harness sync
 AGENT_HARNESS_UPSTREAM=../agent-harness agent-harness sync
 ```
 
+## Hooks
+
+`dev/lib/session-brief.sh` is a pair of Claude Code hooks (POSIX sh, always exits 0).
+`brief` runs at SessionStart and prints the newest handoff doc (picked by the date in its
+name, warned when older than 3 days), main CI, and an optional gate-status table.
+`precompact` runs at PreCompact and warns, never blocks, when no handoff is dated today.
+Add to `.claude/settings.json` (already in the template there):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{ "matcher": "startup|clear", "hooks": [
+      { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/dev/lib/session-brief.sh\" brief", "timeout": 30 } ] }],
+    "PreCompact": [{ "hooks": [
+      { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/dev/lib/session-brief.sh\" precompact", "timeout": 10 } ] }]
+  }
+}
+```
+
+Configure with environment variables: `HANDOFF_GLOB` (default
+`dev/notes/next-session-priorities-*.md`, relative to the repo root), `HANDOFF_TZ` (default
+`UTC`; defines "today"), and `GATE_STATUS_CMD` (optional, e.g. `sh dev/scripts/pr_gate_status.sh`;
+skipped when unset or not found). Test: `sh bin/test-session-brief.sh`.
+
 ## CLI tooling
 
 All three subcommands are implemented and available in `v0.1.0`:

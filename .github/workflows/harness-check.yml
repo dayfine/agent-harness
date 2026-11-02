@@ -14,6 +14,8 @@ on:
       - 'bin/test-wait-pr-checks.sh'
       - 'bin/agent-harness-sync.sh'
       - 'bin/test-agent-harness-sync.sh'
+      - 'dev/lib/session-brief.sh'
+      - 'bin/test-session-brief.sh'
 
 jobs:
   check-harness:
@@ -36,3 +38,6 @@ jobs:
       - name: Test agent-harness-sync.sh
         if: hashFiles('bin/test-agent-harness-sync.sh') != ''
         run: sh bin/test-agent-harness-sync.sh
+      - name: Test session-brief.sh
+        if: hashFiles('bin/test-session-brief.sh') != ''
+        run: sh bin/test-session-brief.sh
