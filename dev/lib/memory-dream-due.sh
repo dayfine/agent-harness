@@ -53,9 +53,10 @@ TODAY=${DREAM_TODAY:-$(date +%Y-%m-%d)}
 STAMP="$MEMORY_DIR/.last-dream"
 
 # Whole days from date $1 to date $2 (both YYYY-MM-DD); empty if either fails to parse.
+# Parsed in UTC: in local time a span across a DST change is an hour off whole days and floors short.
 _days_between() {
-  a=$(date -j -f %Y-%m-%d "$1" +%s 2>/dev/null || date -d "$1" +%s 2>/dev/null) || return 0
-  b=$(date -j -f %Y-%m-%d "$2" +%s 2>/dev/null || date -d "$2" +%s 2>/dev/null) || return 0
+  a=$(TZ=UTC date -j -f %Y-%m-%d "$1" +%s 2>/dev/null || TZ=UTC date -d "$1" +%s 2>/dev/null) || return 0
+  b=$(TZ=UTC date -j -f %Y-%m-%d "$2" +%s 2>/dev/null || TZ=UTC date -d "$2" +%s 2>/dev/null) || return 0
   echo $(( (b - a) / 86400 ))
 }
 
