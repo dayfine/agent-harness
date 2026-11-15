@@ -29,10 +29,12 @@ your project.
     agent-liveness.md          — five ways dispatched agents stall, and the rule for each
     standing-rules.md          — the block every dispatched agent definition carries
     long-chain-ownership.md    — scripts wait, agents decide: runner, handoff, CI waits, budgets
+    memory-consolidation.md    — "dreaming": curate the memory store on a churn-adaptive cadence; cross-repo tiers
   standing-rules.conf          — which agents must carry which standing-rules roles
 .claude/skills/
   pr-tree/SKILL.md             — "print the PR tree and queue"; runs dev/lib/pr-tree.sh
   codex-dispatch/SKILL.md      — hand tasks to Codex, advisory Codex PR reviews, quota pacing
+  memory-dream/SKILL.md        — run one memory consolidation pass (merge, verify, archive, promote, trim)
 bin/
   agent-harness-check.sh       — every harness file carries a harness: layer tag
   agent-standing-rules-check.sh — every listed agent definition carries its standing rules
@@ -48,6 +50,7 @@ dev/
   lib/codex-review.sh          — advisory Codex review of one PR, validated then posted (config: dev/codex-review.env)
   lib/codex-quota.sh           — Codex 5-hour / weekly usage, with --guard exits for pacing
   lib/codex-push.sh            — the only push Codex runs: current codex/* branch to origin
+  lib/memory-dream-due.sh      — is a memory pass due? floor / ceiling / churn / index-fill (config: dev/memory-dream.conf)
   plans/README.md              — conventions for `dev/plans/<feature>-<YYYY-MM-DD>.md` files
   status/_index.md             — skeleton index of tracked work
 ```
